@@ -99,7 +99,6 @@ def random_str(length):
     a = []
     for i in range(length):
         a.append(random.choice("qwerty"))
-    # a = random.sample("qwerty", length)
     return "".join(a)
 
 
@@ -128,8 +127,7 @@ def test_time(func):
     print("Время: {:7.4} секунд".format(t / count))
 
 
-def test_memory(func):
-    length = int(input("Введите длину строки: "))
+def test_memory(func, length):
     s1 = random_str(length)
     s2 = random_str(length)
     print("Строка 1:", s1)
@@ -171,7 +169,8 @@ def main():
     elif act_n == 2:
         test_time(f)
     elif act_n == 3:
-        test_memory(f)
+        length = int(input("Введите длину строки: "))
+        test_memory(f, length)
     else:
         print("Ошибка: Неизвестное действие")
 

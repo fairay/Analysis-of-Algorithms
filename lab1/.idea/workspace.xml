@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9812ca8d-48ee-4dd6-9ed6-72549af1b004" name="Default Changelist" comment="" />
+    <list default="true" id="9812ca8d-48ee-4dd6-9ed6-72549af1b004" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/report_word.docx" beforeDir="false" afterPath="$PROJECT_DIR$/report_word.docx" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,16 +17,16 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="560">
-              <caret line="138" column="36" lean-forward="true" selection-start-line="138" selection-start-column="36" selection-end-line="138" selection-end-column="36" />
+            <state relative-caret-position="1140">
+              <caret line="93" column="26" lean-forward="true" selection-start-line="93" selection-start-column="26" selection-end-line="93" selection-end-column="26" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
                 <element signature="e#30#62#0" />
-                <element signature="e#104#576#0" />
-                <element signature="e#1897#2376#0" />
-                <element signature="e#2970#3044#0" />
+                <element signature="e#701#955#0" />
+                <element signature="e#908#996#0" />
+                <element signature="e#1036#1306#0" />
+                <element signature="e#1585#1847#0" />
                 <element signature="e#2899#2984#0" />
-                <element signature="e#3054#3906#0" />
                 <element signature="e#73#577#1" />
               </folding>
             </state>
@@ -48,7 +52,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="x" value="-11" />
     <option name="y" value="-8" />
     <option name="width" value="1937" />
@@ -133,18 +137,17 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-5" width="1291" height="692" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="0" weight="0.11497976" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" weight="0.39786857" />
+      <window_info active="true" anchor="bottom" id="Python Console" visible="true" weight="0.39642859" />
       <window_info anchor="bottom" id="Terminal" weight="0.3285968" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" x="0" y="23" width="1281" height="658" id="Run" order="2" type="WINDOWED" visible="true" weight="0.38898757" />
+      <window_info anchor="bottom" x="-1366" y="23" width="1366" height="705" id="Run" order="2" type="WINDOWED" visible="true" weight="0.38898757" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -166,16 +169,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="560">
-          <caret line="138" column="36" lean-forward="true" selection-start-line="138" selection-start-column="36" selection-end-line="138" selection-end-column="36" />
+        <state relative-caret-position="1140">
+          <caret line="93" column="26" lean-forward="true" selection-start-line="93" selection-start-column="26" selection-end-line="93" selection-end-column="26" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
             <element signature="e#30#62#0" />
-            <element signature="e#104#576#0" />
-            <element signature="e#1897#2376#0" />
-            <element signature="e#2970#3044#0" />
+            <element signature="e#701#955#0" />
+            <element signature="e#908#996#0" />
+            <element signature="e#1036#1306#0" />
+            <element signature="e#1585#1847#0" />
             <element signature="e#2899#2984#0" />
-            <element signature="e#3054#3906#0" />
             <element signature="e#73#577#1" />
           </folding>
         </state>
