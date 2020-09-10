@@ -10,6 +10,7 @@ def print_matrix(m):
 
 
 def lev_matrix(s1, s2, is_print=False):
+    print("Tested matrix")
     matr = [[0] * (len(s1)+1) for i in range(len(s2)+1)]
 
     for j in range(len(s1)+1):
@@ -67,6 +68,8 @@ def lev_matrix_recursion(s1, s2, is_print=False):
 
 
 def dem_lev_matrix(s1, s2, is_print=False):
+    if len(s1) == 0: return len(s2)
+    elif len(s2) == 0: return len(s1)
     matr = [[0] * (len(s1) + 1) for i in range(len(s2) + 1)]
     for j in range(len(s1)+1):
         matr[0][j] = j
@@ -177,37 +180,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-"""
-import psutil
-
-def fibo(i):
-    if i == 0: return 0
-    if i == 1: return 1
-    return fibo(i-1) + fibo(i-2)
-
-p = psutil.Process()
-
-mem1 = p.memory_info().peak_wset
-print(mem1)
-fibo(30)
-mem2 = p.memory_info().peak_wset
-print(mem2)
-
-print("Всего: ", mem2 - mem1, "байт")
-
-
-
-import memory_profiler
-import time
-
-def main():
-    mem_usage = memory_profiler.memory_usage(test, .05, 3)
-    time.sleep(0.3)
-    test()
-    print(mem_usage)
-    print(max(mem_usage))
-
-if __name__ == "__main__":
-    main()
-"""
