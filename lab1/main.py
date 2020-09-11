@@ -10,7 +10,6 @@ def print_matrix(m):
 
 
 def lev_matrix(s1, s2, is_print=False):
-    print("Tested matrix")
     matr = [[0] * (len(s1)+1) for i in range(len(s2)+1)]
 
     for j in range(len(s1)+1):
@@ -103,7 +102,6 @@ def random_str(length):
     for i in range(length):
         a.append(random.choice("qwerty"))
     return "".join(a)
-
 
 
 def test_input(func):
