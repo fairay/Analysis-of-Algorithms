@@ -3,11 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="9812ca8d-48ee-4dd6-9ed6-72549af1b004" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/module_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/module_tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/report.aux" beforeDir="false" afterPath="$PROJECT_DIR$/report.aux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/report.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/report.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/report_word.docx" beforeDir="false" afterPath="$PROJECT_DIR$/report_word.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schemes/Lev_mat.graphml" beforeDir="false" afterPath="$PROJECT_DIR$/schemes/Lev_mat.graphml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/report.tex" beforeDir="false" afterPath="$PROJECT_DIR$/report.tex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schemes/Lev_mat_rec.graphml" beforeDir="false" afterPath="$PROJECT_DIR$/schemes/Lev_mat_rec.graphml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,22 +15,14 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="177">
-              <caret line="50" column="35" lean-forward="true" selection-start-line="50" selection-start-column="35" selection-end-line="50" selection-end-column="35" />
+            <state relative-caret-position="1503">
+              <caret line="179" column="10" lean-forward="true" selection-start-line="179" selection-start-column="10" selection-end-line="180" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
-                <element signature="e#30#62#0" />
-                <element signature="e#193#665#0" />
-                <element signature="e#2110#3181#0" />
-                <element signature="e#2970#3044#0" />
-                <element signature="e#2899#2984#0" />
-                <element signature="e#3179#3590#0" />
-                <element signature="e#3756#4102#0" />
-                <element signature="e#3054#3906#0" />
               </folding>
             </state>
           </provider>
@@ -40,12 +31,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/module_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="123">
-              <caret line="20" column="29" lean-forward="true" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+            <state relative-caret-position="380">
+              <caret line="20" column="29" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
-                <element signature="e#615#811#0" />
-                <element signature="e#857#1120#0" />
               </folding>
             </state>
           </provider>
@@ -83,6 +72,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -94,7 +84,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -250,13 +239,9 @@
     <frame x="-1374" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10741301" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10892587" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" weight="0.39609236" />
-      <window_info anchor="bottom" id="Terminal" weight="0.3285968" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3285968" />
       <window_info active="true" anchor="bottom" x="-1366" y="23" width="1366" height="705" id="Run" order="2" type="WINDOWED" visible="true" weight="0.38898757" />
@@ -264,11 +249,15 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="R Packages" />
-      <window_info anchor="right" id="R Graphics" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3285968" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.39609236" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="R Graphics" order="3" />
+      <window_info anchor="right" id="R Packages" order="4" />
     </layout>
   </component>
   <component name="editorHistoryManager">
@@ -286,32 +275,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/module_tests.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="123">
-          <caret line="20" column="29" lean-forward="true" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+        <state relative-caret-position="1503">
+          <caret line="179" column="10" lean-forward="true" selection-start-line="179" selection-start-column="10" selection-end-line="180" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#615#811#0" />
-            <element signature="e#857#1120#0" />
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/module_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="50" column="35" lean-forward="true" selection-start-line="50" selection-start-column="35" selection-end-line="50" selection-end-column="35" />
+        <state relative-caret-position="380">
+          <caret line="20" column="29" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
           <folding>
-            <element signature="e#0#13#0" expanded="true" />
-            <element signature="e#30#62#0" />
-            <element signature="e#193#665#0" />
-            <element signature="e#2110#3181#0" />
-            <element signature="e#2970#3044#0" />
-            <element signature="e#2899#2984#0" />
-            <element signature="e#3179#3590#0" />
-            <element signature="e#3756#4102#0" />
-            <element signature="e#3054#3906#0" />
+            <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
