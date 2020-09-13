@@ -30,7 +30,7 @@
 \titlelabel{hlabel-formati}
 \titlespacing{\chapter}{42pt}{-80pt}{12pt}
 \titleformat{\section}[hang]{\large\bfseries}{\thesection{. }}{0pt}{\large\bfseries}
-\titlespacing{\section}{42pt}{2pt}{5pt plus 5pt}
+\titlespacing{\section}{42pt}{12pt}{5pt plus 5pt}
 
 % Настройка списков
 \usepackage{enumitem}
@@ -61,7 +61,7 @@
 
 \begin{document}
 	
-%	\includepdf[pages=1]{report_word.pdf}
+	\includepdf[pages=1]{report_word.pdf}
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 	
 	\tableofcontents
@@ -261,7 +261,8 @@ def lev_matrix(s1, s2, is_print=False):
 		print_matrix(matr)
 	return matr[i][j]
 	\end{lstlisting}
-	
+	\newpage
+
 	\begin{lstlisting}[caption = Функции нахождения расстояния Левенштейна рекурсивным методом.]
 def _lev_rec(s1, s2, len1, len2):
 	if len1 == 0: return len2
@@ -383,7 +384,7 @@ class LevTest(GeneralTest):
 		self.assertEqual(self.function("развлечение", "увлечение"), 3)
 
 
-# Набор тестов для алгоритма поиска расстояния Дамерау-Левенштейна
+# Набор тестов для алгоритма поиска расстояния  Дамерау-Левенштейна
 class DemLevMatrixTest(GeneralTest):
 	def setUp(self):
 		self.function = main.dem_lev_matrix
@@ -435,7 +436,7 @@ if __name__ == "__main__":
 	\par $M_{max} = (n+1)*(n+1)*sizeof(int) + (n+n)*(2n*sizeof(char) + 2*sizeof(int)) = (n^2+2n+1)*16 + 2n*(2n + 32) = 20n^2 + 96n  + 16 $ байт
 	
 	% //////////////
-	\section{Оценка памяти}
+	\section{Оценка времени}
 	Для замера процессорного времени исполнения функции используется библиотека time. Проведение измерений производится в функции, приведённой в листинге 3.6. Также в листинге приведена функция $random_str$ для создания строки заданной длины из случайной последовательности символов, с использованием библиотеки random.
 	
 	\begin{lstlisting}[caption = Функция замера процессорного времени работы функции]
