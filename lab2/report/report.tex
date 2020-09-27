@@ -1,0 +1,108 @@
+\documentclass[10pt,a4paper]{report}
+\usepackage[left=3.00cm, right=1.00cm, top=2.00cm, bottom=2.00cm, nohead, footskip=7mm]{geometry}
+\usepackage[14pt]{extsizes}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{pdfpages}
+
+\usepackage[russian]{babel}
+
+% Ссылки внутри текста
+\usepackage{hyperref}
+
+% Отступ абзаца
+\usepackage{indentfirst}
+\setlength{\parindent}{1.5cm} 
+
+% Межстрочный интервал
+\usepackage{setspace}
+\onehalfspacing % интервал 1.5
+
+% Вставка изображений
+\usepackage{graphicx}
+\graphicspath{{../schemes/}}
+
+% Настройка оглавлений
+\usepackage{titlesec}
+\newcommand{\hsp}{\hspace{20pt}}
+\titleformat{\chapter}[hang]{\large\bfseries}{\thechapter{. }}{0pt}{\large\bfseries}
+\titlelabel{hlabel-formati}
+\titlespacing{\chapter}{42pt}{-80pt}{12pt}
+\titleformat{\section}[hang]{\large\bfseries}{\thesection{. }}{0pt}{\large\bfseries}
+\titlespacing{\section}{42pt}{12pt}{5pt plus 5pt}
+
+% Настройка списков
+\usepackage{enumitem}
+\setlist{nolistsep, itemsep=0.3cm,parsep=0pt,leftmargin=1.9cm}
+
+% Настройка листингов
+\usepackage{listings}
+\lstset{
+	language = python,
+	extendedchars=\true,
+	keepspaces=true,
+	basicstyle=\small\sffamily,
+	showstringspaces=\false,
+	numbers=left,
+	stepnumber=1,
+	numbersep=5pt,
+	frame=single,
+	tabsize=2,
+	captionpos=t,
+	breaklines=true,
+	breakatwhitespace=false,
+	escapeinside={\#*}{*)}
+}
+
+
+
+\begin{document}
+	\renewcommand\bibname{Список литературы}
+	
+	\includepdf[pages=1]{title.pdf}
+	
+	\tableofcontents
+	\newpage
+
+	\chapter*{Введение}
+	\addcontentsline{toc}{chapter}{Введение}
+	\input{intro.tex}
+	\newpage
+
+	\chapter{Аналитическая часть}
+	\input{analytical.tex}
+	\newpage
+	
+	\chapter{Конструкторская часть}
+	\input{constructive.tex}
+	\newpage
+
+	\chapter{Технологическая  часть}
+	\input{technological.tex}		
+	\newpage
+	
+	\chapter*{Исследовательская часть}
+	\addcontentsline{toc}{chapter}{Исследовательская часть}
+	\setcounter{chapter}{4}
+	\input{research.tex}
+	\newpage
+	
+	\chapter*{Заключение}
+	\addcontentsline{toc}{chapter}{Заключение}
+	\input{conclusion.tex}
+	\newpage
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\addcontentsline{toc}{chapter}{Список литературы}
+	\makeatletter % список литературы
+	\def\@biblabel#1{#1. }
+	\makeatother
+	\begin{thebibliography}{2}
+		\bibitem{python_unittest} Документация unittest [Электронный ресурс]. Режим доступа: https://docs.python.org/3/library/unittest.html, свободный (дата обращения: 27.09.2020).
+		\bibitem{perf_def} Трудоёмкость программ [Электронный ресурс] Режим доступа: http://ermak.cs.nstu.ru/cprog/html/041.htm , свободный (дата обращения: 27.09.2020).
+	\end{thebibliography}
+\end{document}

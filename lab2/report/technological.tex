@@ -1,0 +1,229 @@
+\section{Выбор языка программирования}
+В качестве языка программирования был выбран Python 3, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы.
+
+
+\section{Листинг кода}
+Реализация алгоритмов поиска расстояний представлена на листингах 3.1-3.2.
+
+\begin{lstlisting}[caption = Функция нахождения расстояния Левенштейна матричным методом.]
+def lev_matrix(s1, s2, is_print=False):
+	matr = [[0] * (len(s1)+1) for i in range(len(s2)+1)]
+	
+	for j in range(len(s1)+1):
+		matr[0][j] = j
+	for i in range(len(s2)+1):
+		matr[i][0] = i
+	
+	for i in range(1, len(s2)+1):
+		for j in range(1, len(s1)+1):
+			add = 0 if s1[j-1] == s2[i-1] else 1
+			matr[i][j] = min(matr[i-1][j]+1, matr[i][j-1]+1, matr[i-1][j-1]+add)
+	
+	if is_print:
+		print("Расстояние:", matr[i][j])
+		print_matrix(matr)
+	return matr[i][j]
+\end{lstlisting}
+\newpage
+
+\begin{lstlisting}[caption = Функции нахождения расстояния Левенштейна рекурсивным методом.]
+def _lev_rec(s1, s2, len1, len2):
+	if len1 == 0: return len2
+	elif len2 == 0: return len1
+	else:
+		return min(_lev_rec(s1, s2, len1, len2-1)+1,
+				_lev_rec(s1, s2, len1-1, len2)+1,
+				_lev_rec(s1, s2, len1-1, len2-1) + 
+				(0 if s1[len1-1] == s2[len2-1]
+				 else 1))
+def lev_recursion(s1, s2, is_print=False):
+	res = _lev_rec(s1, s2, len(s1), len(s2))
+	if is_print:
+		print("Расстояние:", res)
+	return res
+\end{lstlisting}
+
+\begin{lstlisting}[caption = Функции нахождения расстояния Левенштейна рекурсивным методом с заполнением матрицы.]
+def _lev_mr(matr, i, j, s1, s2):
+	if i+1 < len(matr) and j+1 < len(matr[0]):
+		add = 0 if s1[j] == s2[i] else 1
+		if matr[i+1][j+1] > matr[i][j] + add:
+			matr[i+1][j+1] = matr[i][j] + add
+			_lev_mr(matr, i+1, j+1, s1, s2)
+	if j+1 < len(matr[0]) and (matr[i][j+1] > matr[i][j] + 1):
+		matr[i][j+1] = matr[i][j] + 1
+		_lev_mr(matr, i, j+1, s1, s2)
+	if i+1 < len(matr) and (matr[i+1][j] > matr[i][j] + 1):
+		matr[i+1][j] = matr[i][j] + 1
+		_lev_mr(matr, i+1, j, s1, s2)
+
+def lev_matrix_recursion(s1, s2, is_print=False):
+	max_len = max(len(s1), len(s2)) + 1
+	matr = [[max_len] * (len(s1)+1) for i in range(len(s2)+1)]
+	matr[0][0] = 0
+	_lev_mr(matr, 0, 0, s1, s2)
+	
+	if is_print:
+		print("Расстояние:", matr[-1][-1])
+		print_matrix(matr)
+	return matr[-1][-1]
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption = Функция нахождения расстояния Дамерау-Левенштейна матричным методом.]
+def dem_lev_matrix(s1, s2, is_print=False):
+	if len(s1) == 0: return len(s2)
+	elif len(s2) == 0: return len(s1)
+	matr = [[0] * (len(s1) + 1) for i in range(len(s2) + 1)]
+	for j in range(len(s1)+1):
+		matr[0][j] = j
+	for i in range(len(s2)+1):
+		matr[i][0] = i
+	
+	for i in range(1, len(s2) + 1):
+		addM = 0 if s1[0] == s2[i-1] else 1
+		matr[i][1] = min(matr[i-1][1] + 1, matr[i][0] + 1,
+		matr[i-1][0] + addM)
+	for j in range(2, len(s1) + 1):
+		addM = 0 if s1[j-1] == s2[0] else 1
+		matr[1][j] = min(matr[0][j] + 1, matr[1][j-1] + 1,
+		matr[0][j-1] + addM)
+	
+	for i in range(2, len(s2)+1):
+		for j in range(2, len(s1)+1):
+			addM = 0 if s1[j-1] == s2[i-1] else 1
+			addT = 1 if (s1[j-2] == s2[i-1] and s1[j-1] == s2[i-2]) else 2
+			matr[i][j] = min(matr[i-1][j]+1, matr[i][j-1]+1,
+			matr[i-1][j-1]+addM, matr[i-2][j-2]+addT)
+	
+	if is_print:
+		print("Расстояние:", matr[i][j])
+		print_matrix(matr)
+	return matr[i][j]
+	\end{lstlisting}
+	
+
+\section{Результаты тестирования}
+Для тестирования написанных функций была использована библиотека unittest\cite{python_unittest}. Тестирование функций проводилось за счёт сравнения результата, возвращённого функцией и ожидаемого расстояния для разных наборов строк.
+
+Состав тестов приведён в листинге 3.5.
+
+\begin{lstlisting}[caption = Модульные тесты]
+import unittest
+import main
+
+# Общий набор тестов для всех алгоритмов
+class GeneralTest(unittest.TestCase):
+	# Данный класс являтся абстрактным, поэтому для него тесты пропускаются
+	@unittest.skip("Skip GeneralTest")
+	def setUp(self):
+		self.function = None
+	
+	# Проверка пустыми строками
+	def test_empty(self):
+		self.assertEqual(self.function("", ""), 0)
+		self.assertEqual(self.function("a", ""), 1)
+		self.assertEqual(self.function("", "b"), 1)
+		
+	# Проверка нахождения совпадений
+	def test_match(self):
+		self.assertEqual(self.function("abc", "abc"), 0)
+		self.assertEqual(self.function("a", "a"), 0)
+		self.assertEqual(self.function("A", "a"), 1)
+	
+	# Прочие общие тесты
+	def test_other(self):
+		self.assertEqual(self.function("q", "w"), 1)
+		self.assertEqual(self.function("aq", "aw"), 1)
+		self.assertEqual(self.function("a", "aw"), 1)
+		self.assertEqual(self.function("aw", "a"), 1)
+
+
+# Набор тестов для алгоритмов поиска расстояния Левенштейна
+class LevTest(GeneralTest):
+	def test_lev(self):
+		self.assertEqual(self.function("stolb", "telo"), 3)
+		self.assertEqual(self.function("kult_tela", "tela_kult"), 6)
+		self.assertEqual(self.function("развлечение", "увлечение"), 3)
+
+
+# Набор тестов для алгоритма поиска расстояния  Дамерау-Левенштейна
+class DemLevMatrixTest(GeneralTest):
+	def setUp(self):
+		self.function = main.dem_lev_matrix
+
+	def dem_lev_test(self):
+		self.assertEqual(self.function("aba", "aab"), 1)
+		self.assertEqual(self.function("ab", "ba"), 1)
+		self.assertEqual(self.function("abb", "bab"), 1)
+
+
+# Алгоритмы поиска расстояния Левенштейна проходят одинковые тесты из класса LevTest
+# Алгоритм поиска расстояния Левенштейна, матричный метод
+class LevMatrixTest(LevTest):
+	def setUp(self):
+		self.function = main.lev_matrix
+# Алгоритм поиска расстояния Левенштейна, рекурсивный метод
+class LevRecursionTest(LevTest):
+	def setUp(self):
+		self.function = main.lev_recursion
+# Алгоритм поиска расстояния Левенштейна, рекурсивный метод с заполнением матрицы
+class LevMatRecTest(LevTest):
+	def setUp(self):
+	self.function = main.lev_matrix_recursion
+
+# Точка входа, запуск тестов
+if __name__ == "__main__":
+	unittest.main()
+\end{lstlisting}
+
+% //////////////
+\section{Оценка трудоёмкости}
+Произведём оценку наибольшей затрачиваемой алгоритмом памяти $M_{max}$ при поиске расстояний для строк s1 и s2. Для удобства оценки примем длину обеих строк за n.
+
+\textbf{Расстояние Левенштейна, матричный метод.} 
+Память затрачивается на матрицу и две строки.
+\par $M_{max} = (n+1)*(n+1)*sizeof(int) + (n+n)*sizeof(char) = 
+(n+1)*(n+1)*16 + (n+n) = 16*n^2 + 2*17n + 16 $ байт
+
+\textbf{Расстояние Дамерау-Левенштейна, матричный метод.} 
+Аналогично.
+\par $M_{max} = 16*n^2 + 2*17n + 16 $ байт
+
+\textbf{Расстояние Левенштейна, рекурсивный метод. }
+Память используется при каждом вызове функции. Одна функция принимает в качестве аргумента 2 строки по значению, 2 размера строк. Максимальная глубина рекурсии = n+n.
+\par $M_{max} = (n+n)*(2n*sizeof(char) + 2*sizeof(int)) = 2n*(2n + 32) = 4n^2 + 64n $ байт
+
+\textbf{Расстояние Левенштейна, рекурсивный метод с матрицей.} 
+Память используется для матрицы и при каждом вызове функции. Максимальная глубина рекурсии = n+n.
+\par $M_{max} = (n+1)*(n+1)*sizeof(int) + (n+n)*(2n*sizeof(char) + 2*sizeof(int)) = (n^2+2n+1)*16 + 2n*(2n + 32) = 20n^2 + 96n  + 16 $ байт
+
+% //////////////
+\section{Оценка времени}
+Для замера процессорного времени исполнения функции используется библиотека time. Проведение измерений производится в функции, приведённой в листинге 3.6. Также в листинге приведена функция $random\_str$ для создания строки заданной длины из случайной последовательности символов, с использованием библиотеки random.
+
+\begin{lstlisting}[caption = Функция замера процессорного времени работы функции]
+def random_str(length):
+	a = []
+	for i in range(length):
+		a.append(random.choice("qwerty"))
+	return "".join(a)
+
+def test_time(func):
+	length = int(input("Введите длину строки: "))
+	s1 = random_str(length)
+	s2 = random_str(length)
+	print("Строка 1:", s1)
+	print("Строка 2:", s2)
+	
+	begin_t = time.process_time()
+	count = 0
+	while time.process_time() - begin_t < 1.0:
+		func(s1, s2)
+		count += 1
+	
+	t = time.process_time() - begin_t
+	print("Выполнено {:} операций за {:} секунд".format(count, t))
+	print("Время: {:7.4} секунд".format(t / count))
+	\end{lstlisting}
+
