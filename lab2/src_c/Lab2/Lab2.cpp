@@ -2,6 +2,7 @@
 #include <time.h>
 #include <locale.h>
 #include <windows.h>
+#include <vector>
 
 #include "classic.h"
 #include "winograd.h"
@@ -54,7 +55,6 @@ void test_input(mat_t (*f)(mat_t, mat_t, int, int, int))
 
 void test_time(mat_t(*f)(mat_t, mat_t, int, int, int), int n)
 {
-    cout << "\nРазмер матрицы: " << n << endl;
     mat_t a = random_matrix(n, n);
     mat_t b = random_matrix(n, n);
     mat_t c;
@@ -75,19 +75,54 @@ void test_time(mat_t(*f)(mat_t, mat_t, int, int, int), int n)
     free_mat(&b, n, n);
 }
 
+void experiments_series(vector<int> &a)
+{
+    for (int i : a)
+    {
+        cout << "\nРазмер матрицы: " << i << endl;
+
+        cout << "Classic" << endl;
+        test_time(classic_mult, i);
+
+        cout << "Winograd" << endl;
+        test_time(winograd_mult, i);
+    }
+}
+
 int main()
 {
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
 
+    cout << "Программа для умножения матриц:" << endl;
+    cout << "\nВыберите алгоритм:" << endl;
+    cout << "1) Классический" << endl;
+    cout << "2) Винограда" << endl;
+
+    int n;
+    cin >> n;
+
+    switch (n)
+    {
+    case 1:
+        test_input(classic_mult);
+        break;
+    case 2:
+        test_input(winograd_mult);
+        break;
+    default:
+        cout << "Некорректный ввод" << endl;
+        return -1;
+    }
+
+    /*
     run_tests();
 
-    // test_input(winograd_mult);
-    test_time(winograd_mult, 500);
-    test_time(classic_mult, 500);
-    // Результирующая матрица С[MxQ]
-        // 30, 00   36, 00   42, 00
-        // 66, 00   81, 00   96, 00
-        // 102, 00  126, 00  150, 00
+    vector<int> a{ 50, 100, 200, 400, 800};
+    vector<int> a{ 51, 101, 201, 401, 801 };
+    experiments_series(a);
+    experiments_series(a);
+    */
+
     return 0;
 }

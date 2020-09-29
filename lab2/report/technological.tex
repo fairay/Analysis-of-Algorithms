@@ -6,40 +6,78 @@
 Реализация алгоритмов умножения матриц представлена на листингах 3.1-3.2.
 
 \begin{lstlisting}[caption = Функция умножения матриц классическим алгоритмом.]
-def lev_matrix(s1, s2, is_print=False):
-	matr = [[0] * (len(s1)+1) for i in range(len(s2)+1)]
+#include "classic.h"
+#pragma optimize( "", off )
+mat_t classic_mult(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c = create_mat(m, q);
 	
-	for j in range(len(s1)+1):
-		matr[0][j] = j
-	for i in range(len(s2)+1):
-		matr[i][0] = i
-	
-	for i in range(1, len(s2)+1):
-		for j in range(1, len(s1)+1):
-			add = 0 if s1[j-1] == s2[i-1] else 1
-			matr[i][j] = min(matr[i-1][j]+1, matr[i][j-1]+1, matr[i-1][j-1]+add)
-	
-	if is_print:
-		print("Расстояние:", matr[i][j])
-		print_matrix(matr)
-	return matr[i][j]
+	for (int i = 0; i < m; i++)
+	for (int j = 0; j < q; j++)
+	{
+		c[i][j] = 0;
+		for (int k = 0; k < n; k++)
+		c[i][j] += a[i][k] * b[k][j];
+	}
+	return c;
+}
+#pragma optimize( "", on )
 \end{lstlisting}
 
 \begin{lstlisting}[caption = Функция умножения матриц алгоритмом Винограда.]
-def _lev_rec(s1, s2, len1, len2):
-	if len1 == 0: return len2
-	elif len2 == 0: return len1
-	else:
-		return min(_lev_rec(s1, s2, len1, len2-1)+1,
-				_lev_rec(s1, s2, len1-1, len2)+1,
-				_lev_rec(s1, s2, len1-1, len2-1) + 
-				(0 if s1[len1-1] == s2[len2-1]
-				 else 1))
-def lev_recursion(s1, s2, is_print=False):
-	res = _lev_rec(s1, s2, len(s1), len(s2))
-	if is_print:
-		print("Расстояние:", res)
-	return res
+#include "winograd.h"
+
+#pragma optimize( "", off )
+
+arr_t calc_mj(mat_t b, int n, int q)
+{
+	arr_t mj = create_arr(q);
+	for (int j = 0; j < q; j++)
+	{
+		double mjj = 0; 
+		for (int k = 1; k < n; k += 2)
+		mjj += b[k][j] * b[k - 1][j];
+		mj[j] = mjj;
+	}
+	return mj;
+}
+
+mat_t winograd_mult(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c = create_mat(m, q);
+	arr_t mj = calc_mj(b, n, q);
+	
+	for (int i = 0; i < m; i++)
+	{
+		double mi_i = 0;
+		for (int k = 1; k < n; k += 2)
+		mi_i += a[i][k] * a[i][k - 1];
+		
+		for (int j = 0; j < q; j++)
+		{
+			double cij = -(mi_i + mj[j]);
+			int k = 1;
+			int k1 = 0;
+			for (; k < n; k += 2, k1 += 2)
+			cij +=	(a[i][k] + b[k1][j]) *
+			(a[i][k1] + b[k][j]);
+			c[i][j] = cij;
+		}
+	}
+	
+	if (n % 2)
+	{
+		int n_minus1 = n - 1;
+		for (int i = 0; i < m; i++)
+		for (int j = 0; j < q; j++)
+		c[i][j] += a[i][n_minus1] * b[n_minus1][j];
+	}
+	
+	free_arr(&mj);
+	return c;
+}
+
+#pragma optimize( "", on )
 \end{lstlisting}
 
 \section{Использованые оптимизации}
@@ -57,77 +95,113 @@ def lev_recursion(s1, s2, is_print=False):
 Состав тестов приведён в листинге 3.3.
 
 \begin{lstlisting}[caption = Модульные тесты]
-import unittest
-import main
+#include "tests.h"
+// Сравнение результата умножения разными способами
+bool _cmp_funcs(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c1 = classic_mult(a, b, m, n, q);
+	mat_t c2 = winograd_mult(a, b, m, n, q);
+	bool flag = cmp_matrix(c1, c2, m, q);
+	free_mat(&c1, m, q);
+	free_mat(&c2, m, q);
+	return flag;
+}
 
-# Общий набор тестов для всех алгоритмов
-class GeneralTest(unittest.TestCase):
-	# Данный класс являтся абстрактным, поэтому для него тесты пропускаются
-	@unittest.skip("Skip GeneralTest")
-	def setUp(self):
-		self.function = None
+// Матрицы с размером 1x1
+void _size_one_test()
+{
+	mat_t a = create_mat(1, 1);
+	mat_t b = create_mat(1, 1);
 	
-	# Проверка пустыми строками
-	def test_empty(self):
-		self.assertEqual(self.function("", ""), 0)
-		self.assertEqual(self.function("a", ""), 1)
-		self.assertEqual(self.function("", "b"), 1)
-		
-	# Проверка нахождения совпадений
-	def test_match(self):
-		self.assertEqual(self.function("abc", "abc"), 0)
-		self.assertEqual(self.function("a", "a"), 0)
-		self.assertEqual(self.function("A", "a"), 1)
+	a[0][0] = 0;
+	b[0][0] = 1;
+	if (!_cmp_funcs(a, b, 1, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
 	
-	# Прочие общие тесты
-	def test_other(self):
-		self.assertEqual(self.function("q", "w"), 1)
-		self.assertEqual(self.function("aq", "aw"), 1)
-		self.assertEqual(self.function("a", "aw"), 1)
-		self.assertEqual(self.function("aw", "a"), 1)
+	a[0][0] = 3;
+	b[0][0] = 4;
+	if (!_cmp_funcs(a, b, 1, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 1, 1);
+	free_mat(&b, 1, 1);
+	
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Нулевые матрицы
+void _void_test()
+{
+	mat_t a = random_matrix(3, 2);
+	mat_t b = void_matrix(2, 1);
+	if (!_cmp_funcs(a, b, 3, 2, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	a = void_matrix(3, 2);
+	if (!_cmp_funcs(a, b, 3, 2, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	free_mat(&b, 2, 1);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Квадратные матрицы
+void _square_test()
+{
+	mat_t a = random_matrix(4, 4);
+	mat_t b = random_matrix(4, 4);
+	
+	if (!_cmp_funcs(a, b, 4, 4, 4))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 4, 4);
+	free_mat(&b, 4, 4);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Матрицы нечётного размера
+void _odd_test()
+{
+	mat_t a = random_matrix(5, 3);
+	mat_t b = random_matrix(3, 7);
+	
+	if (!_cmp_funcs(a, b, 5, 3, 7))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 5, 3);
+	free_mat(&b, 3, 7);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
 
-
-# Набор тестов для алгоритмов поиска расстояния Левенштейна
-class LevTest(GeneralTest):
-	def test_lev(self):
-		self.assertEqual(self.function("stolb", "telo"), 3)
-		self.assertEqual(self.function("kult_tela", "tela_kult"), 6)
-		self.assertEqual(self.function("развлечение", "увлечение"), 3)
-
-
-# Набор тестов для алгоритма поиска расстояния  Дамерау-Левенштейна
-class DemLevMatrixTest(GeneralTest):
-	def setUp(self):
-		self.function = main.dem_lev_matrix
-
-	def dem_lev_test(self):
-		self.assertEqual(self.function("aba", "aab"), 1)
-		self.assertEqual(self.function("ab", "ba"), 1)
-		self.assertEqual(self.function("abb", "bab"), 1)
-
-
-# Алгоритмы поиска расстояния Левенштейна проходят одинковые тесты из класса LevTest
-# Алгоритм поиска расстояния Левенштейна, матричный метод
-class LevMatrixTest(LevTest):
-	def setUp(self):
-		self.function = main.lev_matrix
-# Алгоритм поиска расстояния Левенштейна, рекурсивный метод
-class LevRecursionTest(LevTest):
-	def setUp(self):
-		self.function = main.lev_recursion
-# Алгоритм поиска расстояния Левенштейна, рекурсивный метод с заполнением матрицы
-class LevMatRecTest(LevTest):
-	def setUp(self):
-	self.function = main.lev_matrix_recursion
-
-# Точка входа, запуск тестов
-if __name__ == "__main__":
-	unittest.main()
+void run_tests()
+{
+	_size_one_test();
+	_void_test();
+	_square_test();
+	_odd_test();
+}
 \end{lstlisting}
+
+Все тесты пройдены успешно.
 
 % //////////////
 \section{Оценка трудоёмкости}
-Произведём оценку трудоёмкости алгоритов. Будем считать, что умножаются матрицы $ A[M*N] $ и $ B[N*Q] $ 
+Произведём оценку трудоёмкости алгоритов. Будем считать, что умножаются матрицы $ A[M*N] $ и $ B[N*Q] $ \\
 
 \textbf{Классический алгоритм умножения.} 
 \par $ f_{cls} = 2 + M\cdot(2 + Q\cdot(3 + 2 + N\cdot(2 + 1 + 2 + 1 + 2))) $
@@ -151,30 +225,27 @@ if __name__ == "__main__":
 
 
 \section{Оценка времени}
-Для замера процессорного времени исполнения функции используется библиотека windows.h. Проведение измерений производится в функции, приведённой в листинге 3.4
+Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функции, приведённой в листинге 3.4
 
 \begin{lstlisting}[caption = Функция замера процессорного времени работы функции]
-def random_str(length):
-	a = []
-	for i in range(length):
-		a.append(random.choice("qwerty"))
-	return "".join(a)
-
-def test_time(func):
-	length = int(input("Введите длину строки: "))
-	s1 = random_str(length)
-	s2 = random_str(length)
-	print("Строка 1:", s1)
-	print("Строка 2:", s2)
-	
-	begin_t = time.process_time()
-	count = 0
-	while time.process_time() - begin_t < 1.0:
-		func(s1, s2)
-		count += 1
-	
-	t = time.process_time() - begin_t
-	print("Выполнено {:} операций за {:} секунд".format(count, t))
-	print("Время: {:7.4} секунд".format(t / count))
-	\end{lstlisting}
+void test_time(mat_t(*f)(mat_t, mat_t, int, int, int), int n)
+{
+	cout << "\nРазмер матрицы: " << n << endl;
+	mat_t a = random_matrix(n, n);
+	mat_t b = random_matrix(n, n);
+	mat_t c;
+	int count = 0;
+	start_counter();
+	while (get_counter() < 3.0 * 1000) {
+		c = f(a, b, n, n, n);
+		free_mat(&c, n, n);
+		count++;
+	}
+	double t = get_counter() / 1000;
+	cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
+	cout << "Время: " << t / count << endl;
+	free_mat(&a, n, n);
+	free_mat(&b, n, n);
+}
+\end{lstlisting}
 
