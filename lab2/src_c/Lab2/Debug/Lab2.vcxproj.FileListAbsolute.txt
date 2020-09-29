@@ -1,0 +1,2 @@
+D:\Work\Analysis_of_Algorithms\lab2\src_c\Lab2\Debug\Lab2.exe
+D:\Work\Analysis_of_Algorithms\lab2\src_c\Lab2\Debug\Lab2.pdb
