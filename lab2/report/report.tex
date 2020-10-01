@@ -25,6 +25,9 @@
 % Вставка изображений
 \usepackage{graphicx}
 \graphicspath{{../schemes/}}
+\RequirePackage{caption}
+\DeclareCaptionLabelSeparator{defffis}{ --- }
+\captionsetup{justification=centering,labelsep=defffis}
 
 % Настройка оглавлений
 \usepackage{titlesec}
@@ -67,7 +70,8 @@
 	
 	\tableofcontents
 	\newpage
-
+	
+	%\renewcommand{\figurename}{\arabic{figure}}
 	\chapter*{Введение}
 	\addcontentsline{toc}{chapter}{Введение}
 	\input{intro.tex}
