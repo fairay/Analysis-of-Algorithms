@@ -1,6 +1,6 @@
 #include "bubble.h"
 
-void bubble_sort(arr_t arr, int n)
+void bubble_sort(arr_t& arr, int n)
 {
 	content_t temp;
 	for (int i=1; i<n; i++)

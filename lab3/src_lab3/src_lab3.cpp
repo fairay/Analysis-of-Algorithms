@@ -6,6 +6,7 @@
 
 #include "bubble.h"
 #include "merge.h"
+#include "radix.h"
 
 #include "tests.h"
 
@@ -46,7 +47,7 @@ void test_input(sort_func f)
     cout << "\nОтсортированный массив:" << endl;
     print_arr(arr, n);
 
-    free_arr(&arr);
+    free_arr(arr);
 }
 
 void test_time(sort_func f, int n)
@@ -55,8 +56,9 @@ void test_time(sort_func f, int n)
 
     int count = 0;
     start_counter();
-    while (get_counter() < 3.0 * 1000) {
-        fill_random_arr(arr, n);
+    while (get_counter() < 3.0 * 1000) 
+    {
+        fill_random_arr(arr, n, -10000, 10000);
         f(arr, n);
         count++;
     }
@@ -64,40 +66,47 @@ void test_time(sort_func f, int n)
 
     start_counter();
     for (int i = 0; i < count; i++)
-        fill_random_arr(arr, n);
+        fill_random_arr(arr, n, -10000, 10000);
     t -= get_counter() / 1000;
 
     cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
     cout << "Время: " << t / count << endl;
 
-    free_arr(&arr);
+    free_arr(arr);
 }
 
 void experiments_series(vector<int>& a)
 {
     for (int i : a)
     {
-        cout << "\nРазмер матрицы: " << i << endl;
+        cout << "\nРазмер массива: " << i << endl;
 
-        cout << "Classic" << endl;
-        // test_time(classic_mult, i);
+        cout << "\nСортировка пузырьком:" << endl;
+        // test_time(bubble_sort, i);
 
-        cout << "Winograd" << endl;
-        // test_time(winograd_mult, i);
+        cout << "\nПоразрядная сортировка:" << endl;
+        test_time(radix_sort, i);
+
+        cout << "\nСортировка слиянием:" << endl;
+        test_time(merge_sort, i);
     }
 }
 
 int main()
 {
-    run_tests();
-
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
+
+    run_tests();
+    vector<int> a{ 20, int(1e2), int(1e3), int(1e4), int(1e5) };
+    // vector<int> a{ int(1e5) };
+    experiments_series(a);
+    experiments_series(a);
 
     cout << "Программа для сортировки массива:" << endl;
     cout << "\nВыберите алгоритм:" << endl;
     cout << "1) Пузырьком" << endl;
-    cout << "2) Расчёской" << endl;
+    cout << "2) Поразрядно" << endl;
     cout << "3) Слиянием" << endl;
 
     int n;
@@ -109,7 +118,7 @@ int main()
         test_input(bubble_sort);
         break;
     case 2:
-        // test_input(winograd_mult);
+        test_input(radix_sort);
         break;
     case 3:
         test_input(merge_sort);

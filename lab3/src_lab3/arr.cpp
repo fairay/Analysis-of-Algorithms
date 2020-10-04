@@ -18,10 +18,10 @@ void input_arr(arr_t arr, int n)
 		std::cin >> arr[i];
 }
 
-void free_arr(arr_t* arr)
+void free_arr(arr_t& arr)
 {
-	delete* arr;
-	*arr = nullptr;
+	delete arr;
+	arr = nullptr;
 }
 
 
@@ -33,18 +33,26 @@ arr_t copy_arr(arr_t source, int n)
 	return dest;
 }
 
-arr_t random_arr(int n)
+arr_t random_arr(int n, content_t min_val, content_t max_val)
 {
 	arr_t arr = create_arr(n);
-	for (int i = 0; i < n; i++)
-		arr[i] = rand() % (2*n) - n;
+	if (min_val > max_val)
+		for (int i = 0; i < n; i++)
+			arr[i] = rand() % (2*n) - n;
+	else
+		for (int i = 0; i < n; i++)
+			arr[i] = rand() % (min_val+max_val) + min_val;
 	return arr;
 }
 
-void fill_random_arr(arr_t arr, int n)
+void fill_random_arr(arr_t arr, int n, content_t min_val, content_t max_val)
 {
-	for (int i = 0; i < n; i++)
-		arr[i] = rand() % (2 * n) - n;
+	if (min_val > max_val)
+		for (int i = 0; i < n; i++)
+			arr[i] = rand() % (2 * n) - n;
+	else
+		for (int i = 0; i < n; i++)
+			arr[i] = rand() % (max_val - min_val) + min_val;
 }
 
 bool is_equal_arr(arr_t arr1, arr_t arr2, int n)

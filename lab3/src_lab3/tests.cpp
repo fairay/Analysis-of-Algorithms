@@ -3,19 +3,19 @@
 bool _cmp_funcs(arr_t arr, int n)
 {
 	bool flag = true;
-	sort_func f_arr[] = { bubble_sort };
+	sort_func f_arr[] = { bubble_sort, merge_sort, radix_sort };
 	arr_t std_arr = copy_arr(arr, n);
 	std::sort(std_arr, std_arr + n);
 
-	for (int i = 0; i < 1 && flag; i++)
+	for (int i = 0; i < 3 && flag; i++)
 	{
 		arr_t my_arr = copy_arr(arr, n);
 		f_arr[i](my_arr, n);
 		flag = is_equal_arr(std_arr, my_arr, n);
-		free_arr(&my_arr);
+		free_arr(my_arr);
 	}
 
-	free_arr(&std_arr);
+	free_arr(std_arr);
 	return flag;
 }
 
@@ -34,7 +34,7 @@ void _size_one_test()
 	}
 
 	std::cout << msg << std::endl;
-	free_arr(&arr);
+	free_arr(arr);
 }
 // Массив одинаковых элементов
 void _same_test()
@@ -53,7 +53,7 @@ void _same_test()
 	}
 
 	std::cout << msg << std::endl;
-	free_arr(&arr);
+	free_arr(arr);
 }
 // Отсортированный массив
 void _sorted_test()
@@ -71,7 +71,7 @@ void _sorted_test()
 	}
 
 	std::cout << msg << std::endl;
-	free_arr(&arr);
+	free_arr(arr);
 }
 //  Отсортированный в обратном порядке массив
 void _reverce_sorted_test()
@@ -90,7 +90,7 @@ void _reverce_sorted_test()
 	}
 
 	std::cout << msg << std::endl;
-	free_arr(&arr);
+	free_arr(arr);
 }
 
 void run_tests()

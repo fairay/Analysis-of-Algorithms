@@ -242,48 +242,124 @@ void run_tests()
 
 
 \section{Оценка трудоёмкости}
-Произведём оценку трудоёмкости алгоритов. Будем считать, что сортируется массив A$[N]$\\
+Произведём оценку трудоёмкости алгоритов. Будем считать, что сортируется массив A$[N]$\\, максимальная разница двух элементов состоит из $K$ элементов.
 
-\textbf{Алгоритм сортировки пузырьком.} 
-\par $ f_{bub} = 2 + (N-1)\cdot(2 + 3 + \frac{N-1 + 1}{2}\cdot[3 + 4 + 
-\left\{\begin{array}{ll}
-	0, & $л.с.$\\
-	9, & $х.с.$
-\end{array}\right.  ])$
+\subsection{Алгоритм сортировки пузырьком}
+	\par $ f_{bub} = 2 + (N-1)\cdot(2 + 3 + \frac{N-1 + 1}{2}\cdot[3 + 4 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		9, & $х.с.$
+	\end{array}\right.  ])$
+	
+	\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot[7 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		9, & $х.с.$
+	\end{array}\right.  ])$
+	
+	Лучший случай (отсортированный массив):
+	\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot 7) = \frac{7}{2}N^{2} + \frac{3}{2}N - 3 $
+	
+	Худший случай (массив в обратном порядке):
+	\par $ f_{bub} = 2 + (N-1)\cdot(5 + 9N) = 9N^{2} - 4N - 3$
 
-\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot[7 + 
-\left\{\begin{array}{ll}
-	0, & $л.с.$\\
-	9, & $х.с.$
-\end{array}\right.  ])$
+\subsection{Алгоритм поразрядной сортировки} 
+\textbf{Функция нормализации массива:}
+	\par $ f_{format} = 2 + 2 + N\cdot[2 + 4 + 
+		\left\{\begin{array}{ll}
+			0, & $л.с.$\\
+			1, & $х.с.$
+		\end{array}\right.] 
+	+ 2 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		1 + 2 + N\cdot(2 + 2), & $х.с.$
+	\end{array}\right. + 1 + (2 + 3K) $
 
-Лучший случай (отсортированный массив):
-\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot 7) = \frac{7}{2}N^{2} + \frac{3}{2}N - 3 $
+	\par $ f_{format} = 9 + 3K + 7N +  
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		3 + 4N, & $х.с.$
+	\end{array}\right. $
 
-Худший случай (массив в обратном порядке):
-\par $ f_{bub} = 2 + (N-1)\cdot(5 + 9N) = 9N^{2} - 4N - 3$
+\textbf{Функция получения значения разряда:}
+	\par $ f_{dig} = 3 + 2 = 5 $
 
+\textbf{Функция поразрядной сортировки:}	
+	\par $ f_{rad} = f_{format} + 1 + 2 +
+	K\cdot(2 + 2 + 10(2 + 1) + 2 +
+		N\cdot(2 + f_{dig} + 2) + 1 + 2 +
+		10(2 + 6) + 2 + N\cdot(2 + f_{dig} + 5) + 3) + 1 +
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		2 + N\cdot(2 + 2), & $х.с.$
+	\end{array}\right. $
 
-\textbf{Классический алгоритм умножения.} 
-\par $ f_{cls} = 2 + M\cdot(2 + Q\cdot(3 + 2 + N\cdot(2 + 1 + 2 + 1 + 2))) $
-\par $ f_{cls} = 2 + 2M + 5QM + 10MNQ $\\
+	\par $ f_{rad} = 24KN + 125K + 7N + 12 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		5 + 8N, & $х.с.$
+	\end{array}\right.$
+	
+	Лучший случай (без отрицательных чисел):
+	\par $ f_{rad} = 24KN + 125K + 7N + 12$
+	
+	Худший случай (с отрицательными числами):
+	\par $ f_{rad} = 24KN + 125K + 15N + 17$
+	
 
-\textbf{Алгоритм умножения Винограда.} 
-\par $ f_{win} = (2 + Q\cdot(2 + 1 + 1 + (N/2)\cdot(2 + 1 + 2 + 1 + 3))) + 
-2 + M\cdot(2 + 1 + 2 + (N/2)\cdot(2 + 1 + 2 + 1 + 2) + 2 + Q\cdot(2 + 3 + 2 + 1 + (N/2)\cdot(3 + 1 + 5 + 1 + 5))) + 1 +
-\left\{\begin{array}{ll}
-	0, & $л.с.$\\
-	2 + 2 + M\cdot(2 + Q\cdot(2 + 3 + 2 + 1 + 2)), & $х.с.$
-\end{array} \right.$\\
-
-\par $ f_{win} = 5 + 4Q + 4.5NQ + 
-7M + 4MN + 8MQ + 7.5MNQ +
-\left\{\begin{array}{ll}
-	0, & $л.с.$\\
-	4 + 2M + 10MQ, & $х.с.$
-\end{array} \right.$
-
-
+\subsection{Алгоритм сортировки слиянием} 
+	\par $ f_{mer} = 2 + \frac{N}{2}\cdot(2 + 4 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		10, & $х.с.$
+	\end{array}\right.) + 1 + 2 + 
+	\log_{2}(N)\cdot(2 + 2 + \dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)\cdot\log_{2}(N)}\cdot
+	[4 + 2 + 1 + 
+		\left\{\begin{array}{ll}
+			1, & $л.с.$\\
+			2, & $х.с.$
+		\end{array}\right. +
+		3 + 2 + 1 + \dfrac{log_{2}(N)*N}{\dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)}}\cdot
+			\left\{\begin{array}{ll}
+				(3 + 4 + 1)/2 + (3 + 3)/2, & $л.с.$\\
+				3 + 4 + 1, & $х.с.$
+			\end{array}\right.
+	] + 5 + 3 + 
+		\left\{\begin{array}{ll}
+			0, & $л.с.$\\
+			2 + \dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)\cdot\log_{2}(N)}\cdot(2 + 3), & $х.с.$
+		\end{array}\right.
+	)$
+	\\
+	
+	\par $ f_{mer} = -21 + 29N + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		5N, & $х.с.$
+	\end{array}\right. + 
+	12\log_{2}(N) + 
+		\left\{\begin{array}{ll}
+			2N-2, & $л.с.$\\
+			4N-4, & $х.с.$
+		\end{array}\right. +
+	(log_{2}(N)*N)\cdot
+		\left\{\begin{array}{ll}
+			7, & $л.с.$\\
+			8, & $х.с.$
+		\end{array}\right.
+	 + 
+	\left\{\begin{array}{ll}
+		0, & $л.с.$\\
+		2\log_{2}(N) + 10(N-1), & $х.с.$
+	\end{array}\right.
+	$ \\
+	
+	Лучший случай (N является степенью 2, отсортированный массив):
+	\par $ f_{mer} = 7N\log_{2}(N) + 31N + 12\log_{2}(N) - 23 $
+	
+	Худший случай (N является степенью 2 - 1, случайный массив):
+	\par $ f_{mer} = 8N\log_{2}(N) + 48N + 14\log_{2}(N) - 35 $
 
 \section{Оценка времени}
 Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функции, приведённой в листинге 3.5.

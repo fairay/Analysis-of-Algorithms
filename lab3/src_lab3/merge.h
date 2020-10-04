@@ -3,7 +3,7 @@
 
 #include "arr.h"
 
-void merge_sort(arr_t arr, int n);
+void merge_sort(arr_t& arr, int n);
 
 #endif // MERGE_H
 

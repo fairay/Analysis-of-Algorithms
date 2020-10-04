@@ -142,6 +142,7 @@
     <ClCompile Include="arr.cpp" />
     <ClCompile Include="bubble.cpp" />
     <ClCompile Include="merge.cpp" />
+    <ClCompile Include="radix.cpp" />
     <ClCompile Include="src_lab3.cpp" />
     <ClCompile Include="tests.cpp" />
   </ItemGroup>
@@ -149,6 +150,7 @@
     <ClInclude Include="arr.h" />
     <ClInclude Include="bubble.h" />
     <ClInclude Include="merge.h" />
+    <ClInclude Include="radix.h" />
     <ClInclude Include="tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
