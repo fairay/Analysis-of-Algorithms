@@ -1,4 +1,5 @@
 #include "radix.h"
+#pragma optimize( "", off )
 
 int* create_digit_arr(int k)
 {
@@ -20,10 +21,10 @@ inline int count_k(int a)
 	return k;
 }
 
-inline int get_digit(int a, int k, int* digit_arr)
+inline int get_digit(int a, int k, int* digits)
 {
-	a %= digit_arr[k+1];
-	a /= digit_arr[k];
+	a %= digits[k+1];
+	a /= digits[k];
 	return a;
 }
 
@@ -60,7 +61,7 @@ void radix_sort(arr_t& arr, int n)
 	int k, decr;
 	format_arr(arr, n, decr, k);
 	int c[10]; // = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int* digit_arr = create_digit_arr(k+1);
+	int* digits = create_digit_arr(k+1);
 	arr_t copy = create_arr(n);
 	arr_t swap_arr;
 
@@ -70,7 +71,7 @@ void radix_sort(arr_t& arr, int n)
 			c[i] = 0;
 
 		for (int i = 0; i < n; i++)
-			c[get_digit(arr[i], dig, digit_arr)]++;
+			c[get_digit(arr[i], dig, digits)]++;
 
 		int count = 0;
 		for (int i = 0; i < 10; i++)
@@ -80,7 +81,7 @@ void radix_sort(arr_t& arr, int n)
 		}
 
 		for (int i = 0; i < n; i++)
-			copy[c[get_digit(arr[i], dig, digit_arr)]++] = arr[i];
+			copy[c[get_digit(arr[i], dig, digits)]++] = arr[i];
 
 		swap_arr = arr;
 		arr = copy;
@@ -91,6 +92,7 @@ void radix_sort(arr_t& arr, int n)
 		for (int i = 0; i < n; i++)
 			arr[i] -= decr;
 
-	free_arr(digit_arr);
+	free_arr(digits);
 	free_arr(copy);
 }
+#pragma optimize( "", on )

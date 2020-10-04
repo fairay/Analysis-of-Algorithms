@@ -1,4 +1,5 @@
 #include "merge.h"
+#pragma optimize( "", off )
 
 void merge_sort(arr_t& arr, int n)
 {
@@ -64,3 +65,5 @@ void merge_sort(arr_t& arr, int n)
 
 	free_arr(copy);
 }
+
+#pragma optimize( "", on )

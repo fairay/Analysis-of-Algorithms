@@ -77,9 +77,10 @@ void test_time(sort_func f, int n)
 
 void experiments_series(vector<int>& a)
 {
+    cout << "\n------------------------------------------------";
     for (int i : a)
     {
-        cout << "\nРазмер массива: " << i << endl;
+        cout << "\n\nРазмер массива: " << i << endl;
 
         cout << "\nСортировка пузырьком:" << endl;
         // test_time(bubble_sort, i);
@@ -98,10 +99,15 @@ int main()
     setlocale(LC_ALL, "Russian");
 
     run_tests();
-    vector<int> a{ 20, int(1e2), int(1e3), int(1e4), int(1e5) };
+    vector<int> a{ 20, int(1e2), int(1e3), int(1e4), int(1e6)};
     // vector<int> a{ int(1e5) };
     experiments_series(a);
     experiments_series(a);
+    experiments_series(a);
+    /*experiments_series(a);
+    experiments_series(a);
+    experiments_series(a);
+    experiments_series(a);*/
 
     cout << "Программа для сортировки массива:" << endl;
     cout << "\nВыберите алгоритм:" << endl;

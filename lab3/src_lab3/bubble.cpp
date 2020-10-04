@@ -1,5 +1,6 @@
 #include "bubble.h"
 
+#pragma optimize( "", off )
 void bubble_sort(arr_t& arr, int n)
 {
 	content_t temp;
@@ -12,3 +13,4 @@ void bubble_sort(arr_t& arr, int n)
 				arr[j] = temp;
 			}
 }
+#pragma optimize( "", on )
