@@ -58,7 +58,8 @@ void test_time(sort_func f, int n)
     start_counter();
     while (get_counter() < 3.0 * 1000) 
     {
-        fill_random_arr(arr, n, -10000, 10000);
+        // fill_random_arr(arr, n, -10000, 10000);
+        fill_random_arr(arr, n, 1, 4);
         f(arr, n);
         count++;
     }
@@ -83,7 +84,7 @@ void experiments_series(vector<int>& a)
         cout << "\n\nРазмер массива: " << i << endl;
 
         cout << "\nСортировка пузырьком:" << endl;
-        // test_time(bubble_sort, i);
+        test_time(bubble_sort, i);
 
         cout << "\nПоразрядная сортировка:" << endl;
         test_time(radix_sort, i);
@@ -98,18 +99,18 @@ int main()
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
 
+    cout << __cplusplus;
     run_tests();
-    vector<int> a{ 20, int(1e2), int(1e3), int(1e4), int(1e6)};
-    // vector<int> a{ int(1e5) };
-    experiments_series(a);
-    experiments_series(a);
-    experiments_series(a);
-    /*experiments_series(a);
-    experiments_series(a);
-    experiments_series(a);
-    experiments_series(a);*/
 
-    cout << "Программа для сортировки массива:" << endl;
+    
+    // vector<int> a{ 20, int(1e2), int(1e3), int(1e4), int(1e5)};
+    vector<int> a{ 10, int(1e4), int(1e5) };
+    experiments_series(a);
+    experiments_series(a);
+    experiments_series(a);
+    
+
+    cout << "\nПрограмма для сортировки массива:" << endl;
     cout << "\nВыберите алгоритм:" << endl;
     cout << "1) Пузырьком" << endl;
     cout << "2) Поразрядно" << endl;
@@ -133,14 +134,6 @@ int main()
         cout << "Некорректный ввод" << endl;
         return -1;
     }
-
-    /*
-    run_tests();
-    vector<int> a{ 50, 100, 200, 400, 800};
-    vector<int> a{ 51, 101, 201, 401, 801 };
-    experiments_series(a);
-    experiments_series(a);
-    */
 
     return 0;
 }
