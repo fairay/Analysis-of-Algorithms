@@ -1,463 +1,182 @@
 \section{Выбор языка программирования}
-В качестве языка программирования был выбран C++, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для отключения оптимизации компилятора.
+В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для использования многопоточности. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
 
 
 \section{Листинг кода}
-Реализация алгоритмов умножения матриц представлена на листингах 3.1-3.3.
+Реализация алгоритма поиска простых чисел представлена на листинге 3.1
 
-\begin{lstlisting}[caption = Функция сортировки пузырьком.]
-#include "bubble.h"
+\begin{lstlisting}[caption = Функция параллельного поиска простых чисел.]
+#include "primes.h"
 
-#pragma optimize( "", off )
-void bubble_sort(arr_t& arr, int n)
+using namespace std;
+std::mutex set_mtx;
+
+inline bool is_prime_n(n_t n)
 {
-	content_t temp;
-	for (int i=1; i<n; i++)
-		for (int j=0; j<n-i; j++)
-			if (arr[j] > arr[j + 1])
-			{
-				temp = arr[j + 1];
-				arr[j + 1] = arr[j];
-				arr[j] = temp;
-			}
-}
-#pragma optimize( "", on )
-\end{lstlisting}
-
-\begin{lstlisting}[caption = Функция поразрядной сортировки.]
-#include "radix.h"
-#pragma optimize( "", off )
-
-int* create_digit_arr(int k)
-{
-	int* arr = create_arr(k);
-	int n = 1;
-	for (int i = 0; i < k; i++, n *= 10)
-		arr[i] = n;
-	return arr;
+	double max_check = sqrt(n + 1);
+	for (n_t i = 2; i < max_check; i++)
+	if (n % i == 0)
+	return false;
+	return true;
 }
 
-inline int count_k(int a)
+void thread_proc(set<n_t>& set, n_t start_n, n_t end_n, int step)
 {
-	int k = 0;
-	while (a > 0)
+	for (n_t i = start_n; i <= end_n; i += step)
+	if (is_prime_n(i))
 	{
-		a /= 10;
-		k++;
+		set_mtx.lock();
+		set.insert(i);
+		set_mtx.unlock();
 	}
-	return k;
 }
 
-inline int get_digit(int a, int k, int* digits)
+set<n_t> find_primes(n_t max_n, int thread_n)
 {
-	a %= digits[k+1];
-	a /= digits[k];
-	return a;
-}
-
-void format_arr(arr_t arr, int n, int& decr, int& k)
-{
-	int min_el = arr[0];
-	int max_el = min_el;
-	for (int i = 1; i < n; i++)
+	set<n_t> set;
+	vector<thread> thread_arr;
+	
+	n_t start_n;
+	for (int i = 0; i < thread_n; i++)
 	{
-		int el = arr[i];
-		if (el < min_el)
-			min_el = el;
-		if (el > max_el)
-			max_el = el;
+		start_n = static_cast<n_t>(i) + 2;
+		thread_arr.push_back(thread(thread_proc, ref(set), start_n, max_n, thread_n));
 	}
 	
-	if (min_el < 0)
-	{
-		decr = -min_el;
-		max_el -= min_el;
-		for (int i = 0; i < n; i++)
-			arr[i] -= min_el;
-	}
-	else
-	{
-		decr = 0;
-	}
+	for (int i = 0; i < thread_n; i++)
+	thread_arr[i].join();
 	
-	k = count_k(max_el);
+	return set;
 }
-
-void radix_sort(arr_t& arr, int n)
-{
-	int k, decr;
-	format_arr(arr, n, decr, k);
-	int c[10]; // = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int* digits = create_digit_arr(k+1);
-	arr_t copy = create_arr(n);
-	arr_t swap_arr;
-	
-	for (int dig = 0; dig < k; dig++)
-	{
-		for (int i = 0; i < 10; i++)
-			c[i] = 0;
-		
-		for (int i = 0; i < n; i++)
-			c[get_digit(arr[i], dig, digits)]++;
-		
-		int count = 0;
-		for (int i = 0; i < 10; i++)
-		{
-			count += c[i];
-			c[i] = count - c[i];
-		}
-		
-		for (int i = 0; i < n; i++)
-			copy[c[get_digit(arr[i], dig, digits)]++] = arr[i];
-		
-		swap_arr = arr;
-		arr = copy;
-		copy = swap_arr;
-	}
-	
-	if (decr)
-	for (int i = 0; i < n; i++)
-		arr[i] -= decr;
-	
-	free_arr(digits);
-	free_arr(copy);
-}
-#pragma optimize( "", on )
-\end{lstlisting}
-
-\begin{lstlisting}[caption = Функция сортировки слиянием.]
-#include "merge.h"
-#pragma optimize( "", off )
-
-void merge_sort(arr_t& arr, int n)
-{
-	content_t temp;
-	for (int i = 1; i < n; i += 2)
-		if (arr[i - 1] > arr[i])
-		{
-			temp = arr[i - 1];
-			arr[i - 1] = arr[i];
-			arr[i] = temp;
-		}
-	
-	arr_t copy = create_arr(n);
-	arr_t swap_arr;
-	for (int merge_size = 2; merge_size < n; merge_size *= 2)
-	{
-		int i = 0;
-		for (; i+merge_size < n; i += merge_size * 2)
-		{
-			int center = i + merge_size;
-			int left;
-			if (center + merge_size > n)
-			left = n;
-			else
-			left = center + merge_size;
-			
-			int j = i;
-			int k1 = i;
-			int k2 = center;
-			while (k1 < center && k2 < left)
-			{
-				if (arr[k1] < arr[k2])
-				{
-					copy[j] = arr[k1];
-					k1++;
-				} 
-				else 
-				{
-					copy[j] = arr[k2];
-					k2++;
-				}
-				j++;
-			}
-			
-			if (k1 == center)
-				for (; k2 < left; k2++, j++)
-					copy[j] = arr[k2];
-			else 
-				for (; k1 < center; k1++, j++)
-					copy[j] = arr[k1];
-		}
-		
-		if (i + merge_size >= n && i < n)
-		{			
-			for (int j = i; j < n; j++)
-				copy[j] = arr[j];
-		}
-		
-		swap_arr = arr;
-		arr = copy;
-		copy = swap_arr;
-	}
-	
-	free_arr(copy);
-}
-
-#pragma optimize( "", on )
-
 \end{lstlisting}
 
 
 \section{Результаты тестирования}
-Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций с резельтатом функции из стандартной библиотеки algorithm.
+Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций друг с другом (в случае разного количества потоков) и заданным ожидаемым результатом.
 
-Состав тестов приведён в листинге 3.4.
+Состав тестов приведён в листинге 3.2.
 
 \begin{lstlisting}[caption = Модульные тесты]
 #include "tests.h"
-// Сравнение работы функций со стандартной
-bool _cmp_funcs(arr_t arr, int n)
+
+using namespace std;
+
+// Сравнение множеств
+bool cmp_sets(vector<set<n_t>>& all_results)
 {
-	bool flag = true;
-	sort_func f_arr[] = { bubble_sort, merge_sort, radix_sort };
-	arr_t std_arr = copy_arr(arr, n);
-	std::sort(std_arr, std_arr + n);
+	int res_size = all_results.size();
+	for (int i = 0; i < res_size -1; i++)
+	if (all_results[i].size() != all_results[i + 1].size())
+	return false;
 	
-	for (int i = 0; i < 3 && flag; i++)
-	{
-		arr_t my_arr = copy_arr(arr, n);
-		f_arr[i](my_arr, n);
-		flag = is_equal_arr(std_arr, my_arr, n);
-		free_arr(my_arr);
-	}
+	for (auto n : all_results[0])
+	for (int i = 1; i < res_size; i++)
+	all_results[i].erase(n);
+	all_results[0].clear();
 	
-	free_arr(std_arr);
-	return flag;
+	for (int i = 0; i < res_size-1; i++)
+	if (all_results[i].size() != all_results[i + 1].size())
+	return false;
+	return true;
 }
 
-// Массив размером 1
-void _size_one_test()
+// Сравнение разультата работы при разном количестве потоков
+void _test_threads(void)
 {
 	std::string msg;
 	msg = __FUNCTION__;		msg += " - OK";
 	
-	arr_t arr = create_arr(1);
-	arr[0] = 42;
+	n_t max_n = 1000;
+	vector<set<n_t>> all_results;
 	
-	if (!_cmp_funcs(arr, 1))
+	for (int i = 0; i < 20; i++)
+	all_results.push_back(find_primes(max_n, i+1));
+	
+	if (!cmp_sets(all_results)) 
 	{
 		msg = __FUNCTION__;		msg += " - FAILED";
 	}
 	
 	std::cout << msg << std::endl;
-	free_arr(arr);
 }
-// Массив одинаковых элементов
-void _same_test()
+
+// Тест при максимальном числе = 2
+void _test_2(void)
 {
 	std::string msg;
 	msg = __FUNCTION__;		msg += " - OK";
 	
-	int n = 10;
-	arr_t arr = create_arr(n);
-	for (int i = 0; i < n; i++)
-	arr[i] = 42;
+	vector<set<n_t>> all_results;
 	
-	if (!_cmp_funcs(arr, n))
+	all_results.push_back(set<n_t>{2});
+	all_results.push_back(find_primes(2, 1));
+	
+	if (!cmp_sets(all_results))
 	{
 		msg = __FUNCTION__;		msg += " - FAILED";
 	}
 	
 	std::cout << msg << std::endl;
-	free_arr(arr);
 }
-// Отсортированный массив
-void _sorted_test()
+
+// Тест при максимальном числе = 200
+void _test_200(void)
 {
 	std::string msg;
 	msg = __FUNCTION__;		msg += " - OK";
 	
-	int n = 100;
-	arr_t arr = random_arr(n);
-	std::sort(arr, arr + n);
+	vector<set<n_t>> all_results;
 	
-	if (!_cmp_funcs(arr, n))
+	all_results.push_back(set<n_t>{2, 3, 5, 7, 11, 13, 17, 19, 23,
+		29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+		97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
+		157, 163, 167, 173, 179, 181, 191, 193, 197, 199});
+	all_results.push_back(find_primes(200, 1));
+	
+	if (!cmp_sets(all_results))
 	{
 		msg = __FUNCTION__;		msg += " - FAILED";
 	}
 	
 	std::cout << msg << std::endl;
-	free_arr(arr);
-}
-//  Отсортированный в обратном порядке массив
-void _reverce_sorted_test()
-{
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
-	
-	int n = 100;
-	arr_t arr = random_arr(n);
-	std::sort(arr, arr + n);
-	std::reverse(arr, arr + n);
-	
-	if (!_cmp_funcs(arr, n))
-	{
-		msg = __FUNCTION__;		msg += " - FAILED";
-	}
-	
-	std::cout << msg << std::endl;
-	free_arr(arr);
 }
 
 void run_tests()
 {
-	_size_one_test();
-	_same_test();
-	_sorted_test();
-	_reverce_sorted_test();
+	_test_threads();
+	_test_2();
+	_test_200();
 }
 \end{lstlisting}
 
 Все тесты пройдены успешно.
 
-\section{Оценка трудоёмкости}
-Произведём оценку трудоёмкости алгоритов. Будем считать, что сортируется массив A$[N]$, максимальная разница двух элементов состоит из $K$ элементов.
-
-\subsection{Алгоритм сортировки пузырьком}
-	\par $ f_{bub} = 2 + (N-1)\cdot(2 + 3 + \frac{N-1 + 1}{2}\cdot[3 + 4 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		9, & $х.с.$
-	\end{array}\right.  ])$
-	
-	\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot[7 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		9, & $х.с.$
-	\end{array}\right.  ])$
-	
-	Лучший случай (отсортированный массив):
-	\par $ f_{bub} = 2 + (N-1)\cdot(5 + \frac{N}{2}\cdot 7) = \frac{7}{2}N^{2} + \frac{3}{2}N - 3 $
-	
-	Худший случай (массив в обратном порядке):
-	\par $ f_{bub} = 2 + (N-1)\cdot(5 + 9N) = 9N^{2} - 4N - 3$
-
-\subsection{Алгоритм поразрядной сортировки} 
-\textbf{Функция нормализации массива:}
-	\par $ f_{format} = 2 + 2 + N\cdot[2 + 4 + 
-		\left\{\begin{array}{ll}
-			0, & $л.с.$\\
-			1, & $х.с.$
-		\end{array}\right.] 
-	+ 2 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		1 + 2 + N\cdot(2 + 2), & $х.с.$
-	\end{array}\right. + 1 + (2 + 3K) $
-
-	\par $ f_{format} = 9 + 3K + 7N +  
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		3 + 4N, & $х.с.$
-	\end{array}\right. $
-
-\textbf{Функция получения значения разряда:}
-	\par $ f_{dig} = 3 + 2 = 5 $
-
-\textbf{Функция поразрядной сортировки:}	
-	\par $ f_{rad} = f_{format} + 1 + 2 +
-	K\cdot(2 + 2 + 10(2 + 1) + 2 +
-		N\cdot(2 + f_{dig} + 2) + 1 + 2 +
-		10(2 + 6) + 2 + N\cdot(2 + f_{dig} + 5) + 3) + 1 +
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		2 + N\cdot(2 + 2), & $х.с.$
-	\end{array}\right. $
-
-	\par $ f_{rad} = 24KN + 125K + 7N + 12 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		5 + 8N, & $х.с.$
-	\end{array}\right.$
-	
-	Лучший случай (без отрицательных чисел):
-	\par $ f_{rad} = 24KN + 125K + 7N + 12$
-	
-	Худший случай (с отрицательными числами):
-	\par $ f_{rad} = 24KN + 125K + 15N + 17$
-	
-
-\subsection{Алгоритм сортировки слиянием} 
-	\par $ f_{mer} = 2 + \frac{N}{2}\cdot(2 + 4 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		10, & $х.с.$
-	\end{array}\right.) + 1 + 2 + 
-	\log_{2}(N)\cdot(2 + 2 + \dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)\cdot\log_{2}(N)}\cdot
-	[4 + 2 + 1 + 
-		\left\{\begin{array}{ll}
-			1, & $л.с.$\\
-			2, & $х.с.$
-		\end{array}\right. +
-		3 + 2 + 1 + \dfrac{log_{2}(N)*N}{\dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)}}\cdot
-			\left\{\begin{array}{ll}
-				(3 + 4 + 1)/2 + (3 + 3)/2, & $л.с.$\\
-				3 + 4 + 1, & $х.с.$
-			\end{array}\right.
-	] + 5 + 3 + 
-		\left\{\begin{array}{ll}
-			0, & $л.с.$\\
-			2 + \dfrac{2(1-2^{\log_{2}(N)})}{(1 - 2)\cdot\log_{2}(N)}\cdot(2 + 3), & $х.с.$
-		\end{array}\right.
-	)$
-	\\
-	
-	\par $ f_{mer} = -21 + 29N + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		5N, & $х.с.$
-	\end{array}\right. + 
-	12\log_{2}(N) + 
-		\left\{\begin{array}{ll}
-			2N-2, & $л.с.$\\
-			4N-4, & $х.с.$
-		\end{array}\right. +
-	(log_{2}(N)*N)\cdot
-		\left\{\begin{array}{ll}
-			7, & $л.с.$\\
-			8, & $х.с.$
-		\end{array}\right.
-	 + 
-	\left\{\begin{array}{ll}
-		0, & $л.с.$\\
-		2\log_{2}(N) + 10(N-1), & $х.с.$
-	\end{array}\right.
-	$ \\
-	
-	Лучший случай (N является степенью 2, отсортированный массив):
-	\par $ f_{mer} = 7N\log_{2}(N) + 31N + 12\log_{2}(N) - 23 $
-	
-	Худший случай (N является степенью 2 - 1, случайный массив):
-	\par $ f_{mer} = 8N\log_{2}(N) + 48N + 14\log_{2}(N) - 35 $
-
 \section{Оценка времени}
-Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функции, приведённой в листинге 3.5.
+Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функциях, приведённых в листинге 3.3.
 
-\begin{lstlisting}[caption = Функция замера процессорного времени работы функции]
-void test_time(sort_func f, int n)
+\begin{lstlisting}[caption = Функции замера процессорного времени работы функции]
+void test_time(n_t max_n, int thread_n)
 {
-	arr_t arr = random_arr(n);
-	
 	int count = 0;
 	start_counter();
-	while (get_counter() < 3.0 * 1000) 
+	while (get_counter() < 3.0 * 1000)
 	{
-		fill_random_arr(arr, n, -10000, 10000);
-		f(arr, n);
+		find_primes(max_n, thread_n);
 		count++;
 	}
 	double t = get_counter() / 1000;
-	
-	start_counter();
-	for (int i = 0; i < count; i++)
-	fill_random_arr(arr, n, -10000, 10000);
-	t -= get_counter() / 1000;
-	
 	cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
 	cout << "Время: " << t / count << endl;
-	
-	free_arr(arr);
+}
+
+void experiments_series(n_t max_n, vector<int>& thread_arr)
+{
+	cout << "Размер: " << max_n << endl;
+	for (int i : thread_arr)
+	{
+		cout << "\nЧисло потоков = " << i << endl;
+		test_time(max_n, i);
+	}
 }
 \end{lstlisting}
 

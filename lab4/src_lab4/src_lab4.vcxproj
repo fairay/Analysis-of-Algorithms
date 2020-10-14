@@ -141,10 +141,12 @@
   <ItemGroup>
     <ClCompile Include="primes.cpp" />
     <ClCompile Include="src_lab4.cpp" />
+    <ClCompile Include="tests.cpp" />
     <ClCompile Include="timer_.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="primes.h" />
+    <ClInclude Include="tests.h" />
     <ClInclude Include="timer_.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

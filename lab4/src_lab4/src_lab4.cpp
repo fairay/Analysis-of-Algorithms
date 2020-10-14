@@ -4,6 +4,7 @@
 
 #include "timer_.h"
 #include "primes.h"
+#include "tests.h"
 
 using namespace std;
 
@@ -30,8 +31,6 @@ void experiments_series(n_t max_n, vector<int>& thread_arr)
     {
         cout << "\nЧисло потоков = " << i << endl;
         test_time(max_n, i);
-        test_time(max_n, i);
-        test_time(max_n, i);
     }
 }
 
@@ -39,6 +38,8 @@ int main(void)
 {
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
+
+    run_tests();
 
     /*vector<int> a{ 1, 2, 4, 8, 16, 32, 64 };
     experiments_series(1e5, a);

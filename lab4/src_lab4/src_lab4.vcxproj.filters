@@ -24,12 +24,18 @@
     <ClCompile Include="primes.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="tests.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="timer_.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="primes.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="tests.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>

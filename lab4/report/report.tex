@@ -25,6 +25,9 @@
 % Вставка изображений
 \usepackage{graphicx}
 \graphicspath{{../schemes/}}
+\RequirePackage{caption}
+\DeclareCaptionLabelSeparator{defffis}{ --- }
+\captionsetup{justification=centering,labelsep=defffis}
 
 % Настройка оглавлений
 \usepackage{titlesec}
@@ -103,11 +106,14 @@
 	\makeatletter % список литературы
 	\def\@biblabel#1{#1. }
 	\makeatother
-	\begin{thebibliography}{3}
-		\bibitem{sort_def} Методы сортировки: метод. указания к лаб. работе по дисциплине «Информационные технологии» для студентов направления подготовки бакалавра 210400 «Радиотехника» дневной формы обучения / НГТУ; Сост.: Е.Н.Приблудова, С.Б.Сидоров. Н.Новгород, 2012, 11 с. (дата обращения: 30.09.2020).
+	\begin{thebibliography}{5}
+		\bibitem{prime_def} Простое число // Математическая энциклопедия (в 5 томах). — М.: Советская Энциклопедия, 1977. — Т. 4.
+		
+		\bibitem{C++_Doc} Документация языка С++ 98 [Электронный ресурс]. Режим доступа: http://www.open-std.org/JTC1/SC22/WG21/, свободный (дата обращения: 14.10.2020)
+				
+		\bibitem{VisualStudio} Документация среды разработки Visual Studio 2019 [Электронный ресурс]. Режим доступа: https://docs.microsoft.com/ru-ru/visualstudio/windows/?view=vs-2019, свободный (дата обращения: 14.10.2020)
 		
 		\bibitem{QueryPerformanceCounter} QueryPerformanceCounter function [Электронный ресурс]. Режим доступа: https://docs.microsoft.com/en-us/windows/win32/api/profileapi/nf-profileapi-queryperformancecounter, свободный (дата обращения: 28.09.2020).
 		
-		\bibitem{Korman} Кормен, Томас Х. и др., Алгоритмы: построение и анализ, 3-е изд. : Пер. с англ. --- М. : ООО "И.Д.Вильямс", 2018. --- 1328 с. : ил. --- Парал. тит. англ. IBSN 978-5-8459-2016-4 (рус.)
 	\end{thebibliography}
 \end{document}
