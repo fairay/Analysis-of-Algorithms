@@ -139,13 +139,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="matrix.cpp" />
     <ClCompile Include="primes.cpp" />
     <ClCompile Include="src_lab4.cpp" />
+    <ClCompile Include="std_mul.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="timer_.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="matrix.h" />
     <ClInclude Include="primes.h" />
+    <ClInclude Include="std_mul.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="timer_.h" />
   </ItemGroup>

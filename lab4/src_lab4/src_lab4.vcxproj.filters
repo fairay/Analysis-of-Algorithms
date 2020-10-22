@@ -27,6 +27,12 @@
     <ClCompile Include="tests.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="matrix.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="std_mul.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="timer_.h">
@@ -36,6 +42,12 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="tests.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="std_mul.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>

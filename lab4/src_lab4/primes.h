@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <math.h>
 
 using n_t = size_t;
 

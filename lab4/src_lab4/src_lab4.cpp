@@ -2,63 +2,120 @@
 #include <vector>
 #include <memory>
 
+#include <mutex>
 #include "timer_.h"
-#include "primes.h"
 #include "tests.h"
+#include "std_mul.h"
 
 using namespace std;
 
-void test_time(n_t max_n, int thread_n)
+void test_input(mult_f f, int thread_n)
 {
+    cout << "Умножение матрицы A[MxN], B[NxQ]\n";
+    int m, n, q;
+    cout << "Введите размеры M, N, Q: ";
+    cin >> m >> n >> q;
+
+    mat_t a = create_mat(m, n);
+    mat_t b = create_mat(n, q);
+    cout << "Введите матрицу A:\n";
+    fill_mat(a, m, n);
+    cout << "\nВведите матрицу B:\n";
+    fill_mat(b, n, m);
+
+    mat_t c = f(a, b, m, n, q, thread_n);
+    cout << "\nРезультирующая матрица С[MxQ]\n";
+    print_mat(c, m, q);
+
+    free_mat(&a, m, n);
+    free_mat(&b, n, q);
+    free_mat(&c, m, q);
+}
+
+void test_time(mult_f f, int thread_n)
+{
+    int n = 1000;
+    mat_t a = random_matrix(n, n);
+    mat_t b = random_matrix(n, n);
+    mat_t c;
+
     int count = 0;
     start_counter();
-    while (get_counter() < 3.0 * 1000)
-    {
-        find_primes(max_n, thread_n);
+    while (get_counter() < 3.0 * 1000) {
+        c = f(a, b, n, n, n, thread_n);
+        free_mat(&c, n, n);
         count++;
     }
     double t = get_counter() / 1000;
 
+    start_counter();
+    for (int i = 0; i < count; i++)
+    {
+        c = create_mat(n, n);
+        free_mat(&c, n, n);
+    }
+    t -= get_counter() / 1000;
+
     cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
     cout << "Время: " << t / count << endl;
+
+    free_mat(&a, n, n);
+    free_mat(&b, n, n);
 }
 
-void experiments_series(n_t max_n, vector<int>& thread_arr)
+void experiments_series(vector<int>& a)
 {
-    cout << "\n------------------------------------------------\n";
-    cout << "Размер: " << max_n << endl;
-    for (int i : thread_arr)
+    for (int i : a)
     {
-        cout << "\nЧисло потоков = " << i << endl;
-        test_time(max_n, i);
+        cout << "=======================================" << endl;
+        cout << "\nКоличество потоков: " << i << endl;
+
+        cout << "Стандартное умножение(многопоточно по строкам)" << endl;
+        test_time(std_mult_thread1, i);
+        cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
+        test_time(std_mult_thread2, i);
+
+        cout << "\nСтандартное умножение(многопоточно по строкам)" << endl;
+        test_time(std_mult_thread1, i);
+        cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
+        test_time(std_mult_thread2, i);
+
+        cout << "=======================================" << endl;
     }
+    cout << "Стандартное умножение (однопоточно)" << endl;
+    test_time(std_mult, 1);
 }
+
 
 int main(void)
 {
+    mult_f f_arr[] = { std_mult, std_mult_thread1, std_mult_thread2 };
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
 
     run_tests();
 
-    /*vector<int> a{ 1, 2, 4, 8, 16, 32, 64 };
-    experiments_series(1e5, a);
-    experiments_series(1e5, a);
-    experiments_series(1e5, a);*/
+    vector<int> a{ 1, 2, 4, 8, 16, 32 };
+    experiments_series(a);
+    experiments_series(a);
+    experiments_series(a);
 
-    n_t n_max;
-    size_t thread_n;
-    cout << "\nПрограмма для поиска множества простых чисел" << endl;
-    cout << "Введите максимальное число: ";
-    cin >> n_max;
+    size_t f_n;
+    int thread_n = 1;
+    cout << "\nПрограмма для умножения матриц" << endl;
+    cout << "Выберите алгоритм:\n\
+0) Стандартное умножение\n\
+1) Стандартное умножение (многопоточно по строкам)\n\
+2) Стандартное умножение (многопоточно по столбцам)" << endl;
 
-    cout << "\nВведите число потоков: ";
-    cin >> thread_n;
+    cin >> f_n;
 
-    set<n_t> set = find_primes(n_max, thread_n);
-    cout << "Результирующее множество: ";
-    for (auto i : set)
-        cout << i << ", ";
+    if (f_n) {
+        cout << "\nВведите число потоков: ";
+        cin >> thread_n;
+    }
+
+    test_input(f_arr[f_n], thread_n);
 
     return 0;
 }

@@ -2,89 +2,96 @@
 
 using namespace std;
 
-// Сравнение множеств
-bool cmp_sets(vector<set<n_t>>& all_results)
+// Сравнение работы функций
+bool _cmp_funcs(mat_t a, mat_t b, int m, int n, int q, int thread_n)
 {
-	int res_size = all_results.size();
-	for (int i = 0; i < res_size -1; i++)
-		if (all_results[i].size() != all_results[i + 1].size())
-			return false;
-
-	for (auto n : all_results[0])
-		for (int i = 1; i < res_size; i++)
-			all_results[i].erase(n);
-	all_results[0].clear();
-
-	for (int i = 0; i < res_size-1; i++)
-		if (all_results[i].size() != all_results[i + 1].size())
-			return false;
-	return true;
+	mat_t c0 = std_mult(a, b, m, n, q, thread_n);
+	mat_t c1 = std_mult_thread1(a, b, m, n, q, thread_n);
+	mat_t c2 = std_mult_thread2(a, b, m, n, q, thread_n);
+	bool flag = cmp_matrix(c0, c1, m, q);
+	if (flag)
+		flag = cmp_matrix(c1, c2, m, q);
+	free_mat(&c0, m, q);
+	free_mat(&c1, m, q);
+	free_mat(&c2, m, q);
+	return flag;
 }
 
-// Сравнение разультата работы при разном количестве потоков
-void _test_threads(void)
+// Размер матриц = 1
+void _test_size_one()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
+	mat_t a = create_mat(1, 1);
+	mat_t b = create_mat(1, 1);
 
-	n_t max_n = 1000;
-	vector<set<n_t>> all_results;
-
-	for (int i = 0; i < 20; i++)
-		all_results.push_back(find_primes(max_n, i+1));
-
-	if (!cmp_sets(all_results)) 
+	a[0][0] = 0;
+	b[0][0] = 1;
+	if (!_cmp_funcs(a, b, 1, 1, 1, 1))
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
 	}
 
-	std::cout << msg << std::endl;
+	a[0][0] = 3;
+	b[0][0] = 4;
+	if (!_cmp_funcs(a, b, 1, 1, 1, 16))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+
+	free_mat(&a, 1, 1);
+	free_mat(&b, 1, 1);
+
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
-// Тест при максимальном числе = 2
-void _test_2(void)
+// Пустые матрицы
+void _test_void()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
-
-	vector<set<n_t>> all_results;
-
-	all_results.push_back(set<n_t>{2});
-	all_results.push_back(find_primes(2, 1));
-
-	if (!cmp_sets(all_results))
+	mat_t a = random_matrix(3, 2);
+	mat_t b = void_matrix(2, 1);
+	if (!_cmp_funcs(a, b, 3, 2, 1, 1))
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
 	}
+	free_mat(&a, 3, 2);
 
-	std::cout << msg << std::endl;
+	a = void_matrix(3, 2);
+	if (!_cmp_funcs(a, b, 3, 2, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	free_mat(&b, 2, 1);
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
-// Тест при максимальном числе = 200
-void _test_200(void)
+// 
+void _test_threads()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
-
-	vector<set<n_t>> all_results;
-
-	all_results.push_back(set<n_t>{2, 3, 5, 7, 11, 13, 17, 19, 23,
-		29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-		97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
-		157, 163, 167, 173, 179, 181, 191, 193, 197, 199});
-	all_results.push_back(find_primes(200, 1));
-
-	if (!cmp_sets(all_results))
+	mat_t a = random_matrix(50, 50);
+	mat_t b = random_matrix(50, 50);
+	
+	for (int i = 1; i <= 16; i++)
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		if (!_cmp_funcs(a, b, 50, 50, 50, i))
+		{
+			std::cout << __FUNCTION__ << " - FAILED\n";
+			break;
+		}
 	}
 
-	std::cout << msg << std::endl;
+	free_mat(&a, 50, 50);
+	free_mat(&b, 50, 50);
+
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
 void run_tests()
 {
+	_test_size_one();
+	_test_void();
 	_test_threads();
-	_test_2();
-	_test_200();
 }
