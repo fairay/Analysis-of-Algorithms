@@ -32,9 +32,8 @@ void test_input(mult_f f, int thread_n)
     free_mat(&c, m, q);
 }
 
-void test_time(mult_f f, int thread_n)
+void test_time(mult_f f, int n, int thread_n)
 {
-    int n = 1000;
     mat_t a = random_matrix(n, n);
     mat_t b = random_matrix(n, n);
     mat_t c;
@@ -65,25 +64,27 @@ void test_time(mult_f f, int thread_n)
 
 void experiments_series(vector<int>& a)
 {
+    int n = 500;
+    cout << "Размер матриц " << n << "x" << n << endl;
     for (int i : a)
     {
         cout << "=======================================" << endl;
         cout << "\nКоличество потоков: " << i << endl;
 
         cout << "Стандартное умножение(многопоточно по строкам)" << endl;
-        test_time(std_mult_thread1, i);
+        test_time(std_mult_thread1, n, i);
         cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
-        test_time(std_mult_thread2, i);
+        test_time(std_mult_thread2, n, i);
 
         cout << "\nСтандартное умножение(многопоточно по строкам)" << endl;
-        test_time(std_mult_thread1, i);
+        test_time(std_mult_thread1, n, i);
         cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
-        test_time(std_mult_thread2, i);
+        test_time(std_mult_thread2, n, i);
 
         cout << "=======================================" << endl;
     }
     cout << "Стандартное умножение (однопоточно)" << endl;
-    test_time(std_mult, 1);
+    test_time(std_mult, n, 1);
 }
 
 
