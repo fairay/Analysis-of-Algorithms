@@ -3,149 +3,195 @@
 
 
 \section{Листинг кода}
-Реализация алгоритма поиска простых чисел представлена на листинге 3.1
+Реализация алгоритмов умножения матриц представлена на листингах 3.1-3.3
 
-\begin{lstlisting}[caption = Функция параллельного поиска простых чисел.]
-#include "primes.h"
+\begin{lstlisting}[caption = {Функция однопоточного умножения матриц}, captionpos=b]
+mat_t std_mult(mat_t a, mat_t b, int m, int n, int q, int)
+{
+	mat_t c = create_mat(m, q);
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < q; j++)
+		{
+			double res = 0;
+			for (int k = 0; k < n; k++)
+				res += a[i][k] * b[k][j];
+			c[i][j] = res;
+		}
+	return c;
+}
+\end{lstlisting}
 
+\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по строкам)}, captionpos=b]
 using namespace std;
-std::mutex set_mtx;
+std::mutex mtx;
 
-inline bool is_prime_n(n_t n)
+void _mult_thread(mat_t& c, mat_t& a, mat_t& b, int m, int n, int q, int start, int step)
 {
-	double max_check = sqrt(n + 1);
-	for (n_t i = 2; i < max_check; i++)
-	if (n % i == 0)
-	return false;
-	return true;
+	for (int i = start; i < m; i+= step)
+		for (int j = 0; j < q; j++)
+		{
+			double res = 0;
+			for (int k = 0; k < n; k++)
+				res += a[i][k] * b[k][j];
+			mtx.lock();
+			c[i][j] = res;
+			mtx.unlock();
+		}
 }
 
-void thread_proc(set<n_t>& set, n_t start_n, n_t end_n, int step)
+mat_t std_mult_thread1(mat_t a, mat_t b, int m, int n, int q, int thread_n)
 {
-	for (n_t i = start_n; i <= end_n; i += step)
-	if (is_prime_n(i))
-	{
-		set_mtx.lock();
-		set.insert(i);
-		set_mtx.unlock();
-	}
-}
-
-set<n_t> find_primes(n_t max_n, int thread_n)
-{
-	set<n_t> set;
+	mat_t c = create_mat(m, q);
+	
 	vector<thread> thread_arr;
-	
-	n_t start_n;
 	for (int i = 0; i < thread_n; i++)
-	{
-		start_n = static_cast<n_t>(i) + 2;
-		thread_arr.push_back(thread(thread_proc, ref(set), start_n, max_n, thread_n));
-	}
+		thread_arr.push_back(thread(_mult_thread, ref(c), ref(a), ref(b), m, n, q, i, thread_n));
 	
 	for (int i = 0; i < thread_n; i++)
-	thread_arr[i].join();
+		thread_arr[i].join();
 	
-	return set;
+	return c;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по столбцам)}, captionpos=b]
+using namespace std;
+std::mutex mtx;
+
+void _mult_thread2(mat_t& c, mat_t& a, mat_t& b, int m, int n, int q, int start, int step)
+{
+	for (int i = 0; i < m; i++)
+		for (int j = start; j < q; j+=step)
+		{
+			double res = 0;
+			for (int k = 0; k < n; k++)
+				res += a[i][k] * b[k][j];
+			mtx.lock();
+			c[i][j] = res;
+			mtx.unlock();
+		}
+}
+
+mat_t std_mult_thread2(mat_t a, mat_t b, int m, int n, int q, int thread_n)
+{
+	mat_t c = create_mat(m, q);
+	
+	vector<thread> thread_arr;
+	for (int i = 0; i < thread_n; i++)
+		thread_arr.push_back(thread(_mult_thread2, ref(c), ref(a), ref(b), m, n, q, i, thread_n));
+	
+	for (int i = 0; i < thread_n; i++)
+		thread_arr[i].join();
+	
+	return c;
 }
 \end{lstlisting}
 
 
 \section{Результаты тестирования}
-Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций друг с другом (в случае разного количества потоков) и заданным ожидаемым результатом.
+Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций друг с другом.
 
-Состав тестов приведён в листинге 3.2.
+Состав тестов приведён в листинге 3.4.
 
-\begin{lstlisting}[caption = Модульные тесты]
+\begin{lstlisting}[caption = {Модульные тесты}, captionpos=b]
 #include "tests.h"
 
 using namespace std;
 
-// Сравнение множеств
-bool cmp_sets(vector<set<n_t>>& all_results)
+// Сравнение работы функций
+bool _cmp_funcs(mat_t a, mat_t b, int m, int n, int q, int thread_n)
 {
-	int res_size = all_results.size();
-	for (int i = 0; i < res_size -1; i++)
-	if (all_results[i].size() != all_results[i + 1].size())
-	return false;
+	mat_t c0 = std_mult(a, b, m, n, q, thread_n);
+	mat_t c1 = std_mult_thread1(a, b, m, n, q, thread_n);
+	mat_t c2 = std_mult_thread2(a, b, m, n, q, thread_n);
 	
-	for (auto n : all_results[0])
-	for (int i = 1; i < res_size; i++)
-	all_results[i].erase(n);
-	all_results[0].clear();
-	
-	for (int i = 0; i < res_size-1; i++)
-	if (all_results[i].size() != all_results[i + 1].size())
-	return false;
-	return true;
+	bool flag = cmp_matrix(c0, c1, m, q);
+	if (flag)
+		flag = cmp_matrix(c1, c2, m, q);
+		
+	free_mat(&c0, m, q);
+	free_mat(&c1, m, q);
+	free_mat(&c2, m, q);
+	return flag;
 }
 
-// Сравнение разультата работы при разном количестве потоков
-void _test_threads(void)
+// Размер матриц = 1
+void _test_size_one()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
+	mat_t a = create_mat(1, 1);
+	mat_t b = create_mat(1, 1);
 	
-	n_t max_n = 1000;
-	vector<set<n_t>> all_results;
-	
-	for (int i = 0; i < 20; i++)
-	all_results.push_back(find_primes(max_n, i+1));
-	
-	if (!cmp_sets(all_results)) 
+	a[0][0] = 0;
+	b[0][0] = 1;
+	if (!_cmp_funcs(a, b, 1, 1, 1, 1))
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
 	}
 	
-	std::cout << msg << std::endl;
+	a[0][0] = 3;
+	b[0][0] = 4;
+	if (!_cmp_funcs(a, b, 1, 1, 1, 16))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 1, 1);
+	free_mat(&b, 1, 1);
+	
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
-// Тест при максимальном числе = 2
-void _test_2(void)
+// Пустые матрицы
+void _test_void()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
-	
-	vector<set<n_t>> all_results;
-	
-	all_results.push_back(set<n_t>{2});
-	all_results.push_back(find_primes(2, 1));
-	
-	if (!cmp_sets(all_results))
+	mat_t a = random_matrix(3, 2);
+	mat_t b = void_matrix(2, 1);
+	if (!_cmp_funcs(a, b, 3, 2, 1, 1))
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
 	}
+	free_mat(&a, 3, 2);
 	
-	std::cout << msg << std::endl;
+	a = void_matrix(3, 2);
+	if (!_cmp_funcs(a, b, 3, 2, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	free_mat(&b, 2, 1);
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
-// Тест при максимальном числе = 200
-void _test_200(void)
+// Сравнение работы при различном количестве потоков
+void _test_threads()
 {
-	std::string msg;
-	msg = __FUNCTION__;		msg += " - OK";
+	mat_t a = random_matrix(50, 50);
+	mat_t b = random_matrix(50, 50);
 	
-	vector<set<n_t>> all_results;
-	
-	all_results.push_back(set<n_t>{2, 3, 5, 7, 11, 13, 17, 19, 23,
-		29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-		97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
-		157, 163, 167, 173, 179, 181, 191, 193, 197, 199});
-	all_results.push_back(find_primes(200, 1));
-	
-	if (!cmp_sets(all_results))
+	for (int i = 1; i <= 16; i++)
 	{
-		msg = __FUNCTION__;		msg += " - FAILED";
+		if (!_cmp_funcs(a, b, 50, 50, 50, i))
+		{
+			std::cout << __FUNCTION__ << " - FAILED\n";
+			break;
+		}
 	}
 	
-	std::cout << msg << std::endl;
+	free_mat(&a, 50, 50);
+	free_mat(&b, 50, 50);
+	
+	std::cout << __FUNCTION__ << " - OK\n";
 }
 
 void run_tests()
 {
+	_test_size_one();
+	_test_void();
 	_test_threads();
-	_test_2();
-	_test_200();
 }
 \end{lstlisting}
 
@@ -154,31 +200,63 @@ void run_tests()
 \section{Оценка времени}
 Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функциях, приведённых в листинге 3.3.
 
-\begin{lstlisting}[caption = Функции замера процессорного времени работы функции]
-void test_time(n_t max_n, int thread_n)
+\begin{lstlisting}[caption = {Функции замера процессорного времени работы функции}, captionpos=b]
+void test_time(mult_f f, int thread_n)
 {
+	int n = 1000;
+	mat_t a = random_matrix(n, n);
+	mat_t b = random_matrix(n, n);
+	mat_t c;
+	
 	int count = 0;
 	start_counter();
-	while (get_counter() < 3.0 * 1000)
+	while (get_counter() < 3.0 * 1000) 
 	{
-		find_primes(max_n, thread_n);
+		c = f(a, b, n, n, n, thread_n);
+		free_mat(&c, n, n);
 		count++;
 	}
 	double t = get_counter() / 1000;
+	
+	start_counter();
+	for (int i = 0; i < count; i++)
+	{
+		c = create_mat(n, n);
+		free_mat(&c, n, n);
+	}
+	t -= get_counter() / 1000;
+	
 	cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
 	cout << "Время: " << t / count << endl;
+	
+	free_mat(&a, n, n);
+	free_mat(&b, n, n);
 }
 
-void experiments_series(n_t max_n, vector<int>& thread_arr)
+void experiments_series(vector<int>& a)
 {
-	cout << "Размер: " << max_n << endl;
-	for (int i : thread_arr)
+	for (int i : a)
 	{
-		cout << "\nЧисло потоков = " << i << endl;
-		test_time(max_n, i);
+		cout << "=======================================" << endl;
+		cout << "\nКоличество потоков: " << i << endl;
+		
+		cout << "Стандартное умножение(многопоточно по строкам)" << endl;
+		test_time(std_mult_thread1, i);
+		cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
+		test_time(std_mult_thread2, i);
+		
+		cout << "\nСтандартное умножение(многопоточно по строкам)" << endl;
+		test_time(std_mult_thread1, i);
+		cout << "Стандартное умножение(многопоточно по столбцам)" << endl;
+		test_time(std_mult_thread2, i);
+		
+		cout << "=======================================" << endl;
 	}
+	cout << "Стандартное умножение (однопоточно)" << endl;
+	test_time(std_mult, 1);
 }
+
 \end{lstlisting}
 
 \section*{Вывод}
-Результатом технологической части стал выбор используемых технических средств реализации и реализация алгоритма, системы тестов и замера времени работы на языке С++.
+Результатом технологической части стал выбор используемых технических средств реализации и реализация алгоритмов, системы тестов и замера времени работы на языке С++.

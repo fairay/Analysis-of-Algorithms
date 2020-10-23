@@ -68,7 +68,7 @@ void _test_void()
 	std::cout << __FUNCTION__ << " - OK\n";
 }
 
-// 
+// Сравнение работы при различном количестве потоков
 void _test_threads()
 {
 	mat_t a = random_matrix(50, 50);
