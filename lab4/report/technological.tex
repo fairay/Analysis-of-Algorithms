@@ -1,11 +1,11 @@
 \section{Выбор языка программирования}
-В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для использования многопоточности\cite{Thread}. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
+В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для использования многопоточности\cite{Thread}. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
 
 
 \section{Листинг кода}
 Реализация алгоритмов умножения матриц представлена на листингах 3.1-3.3
 
-\begin{lstlisting}[caption = {Функция однопоточного умножения матриц}, captionpos=b]
+\begin{lstlisting}[caption = {Функция однопоточного умножения матриц}]
 mat_t std_mult(mat_t a, mat_t b, int m, int n, int q, int)
 {
 	mat_t c = create_mat(m, q);
@@ -21,7 +21,7 @@ mat_t std_mult(mat_t a, mat_t b, int m, int n, int q, int)
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по строкам)}, captionpos=b]
+\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по строкам)}]
 using namespace std;
 std::mutex mtx;
 
@@ -54,7 +54,7 @@ mat_t std_mult_thread1(mat_t a, mat_t b, int m, int n, int q, int thread_n)
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по столбцам)}, captionpos=b]
+\begin{lstlisting}[caption = {Функция умножения матриц (параллельная по столбцам)}]
 using namespace std;
 std::mutex mtx;
 
@@ -93,7 +93,7 @@ mat_t std_mult_thread2(mat_t a, mat_t b, int m, int n, int q, int thread_n)
 
 Состав тестов приведён в листинге 3.4.
 
-\begin{lstlisting}[caption = {Модульные тесты}, captionpos=b]
+\begin{lstlisting}[caption = {Модульные тесты}]
 #include "tests.h"
 
 using namespace std;
@@ -200,7 +200,7 @@ void run_tests()
 \section{Оценка времени}
 Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функциях, приведённых в листинге 3.3.
 
-\begin{lstlisting}[caption = {Функции замера процессорного времени работы функции}, captionpos=b]
+\begin{lstlisting}[caption = {Функции замера процессорного времени работы функции}]
 void test_time(mult_f f, int thread_n)
 {
 	int n = 1000;
