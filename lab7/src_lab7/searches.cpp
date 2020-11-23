@@ -39,7 +39,6 @@ rec_t binary_search(const rec_arr& arr, size_t key)
     return null_rec();
 }
 
-
 seg_arr split_arr(rec_arr& arr)
 {
     seg_arr segments;
@@ -53,6 +52,7 @@ seg_arr split_arr(rec_arr& arr)
 
     for (int i = 0; i < arr.size(); i++)
         segments[arr[i].key % 10].records.push_back(arr[i]);
+    return segments;
 }
 rec_t segment_search(const seg_arr& segments, size_t key)
 {
