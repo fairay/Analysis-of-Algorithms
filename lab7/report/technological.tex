@@ -1,154 +1,154 @@
 \section{Выбор языка программирования}
-В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для использования многопоточности\cite{Thread}. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
+В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
 
 \section{Листинги кода}
-Реализация алгоритмов шифрования строк представлена на листингах 3.1-3.3. Функции конвейера и ленты приведены на листингах 3.4-3.5
+Реализация алгоритмов поиска представлена на листингах 3.1-3.3. На листинге 3.4 представлена реализация разбиения словаря по сегментам
 
-\begin{lstlisting}[caption = {Функция шифра Фейстеля}]
-void FeistelCipher(string& s)
+\begin{lstlisting}[caption = {Поиск полным перебором}]
+rec_t full_search(const rec_arr& arr, size_t key)
 {
-	const int max_step = 4;
-	int l, r, temp;
-	
-	for (int i = 1; i < s.length(); i += 2)
-	{
-		l = s[i - 1];
-		r = s[i];
-		
-		for (int st = 0; st < max_step; st++)
-		{
-			temp = l;
-			l = r ^ ((l + st * 15) % 256);
-			r = temp;
-		}
-		s[i - 1] = l;
-		s[i] = r;
-	}
+	for (int i = 0; i < arr.size(); i++)
+		if (arr[i].key == key)
+			return arr[i];
+	return null_rec();
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption = {Функция шифра Тритемиуса}]
-void TrithemiusCipher(string& s)
+\begin{lstlisting}[caption = {Поиск половинным разбиением}]
+rec_t binary_search(const rec_arr& arr, size_t key)
 {
-	for (int i = 0; i < s.length(); i++)
+	int left = 0;
+	int right = arr.size() - 1;
+	while (left <= right)
 	{
-		s[i] = (s[i] + (int(sqrt(i)) - 3 * i + 3)) % 256;
+		int mid = (left + right) / 2;
+		if (key == arr[mid].key)
+			return arr[mid];
+		if (key < arr[mid].key)
+			right = mid - 1;  
+		else                  
+			left = mid + 1;   
 	}
+	return null_rec();
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption = {Функция шифра побитовыми сдвигами}]
-using buf_t = long unsigned int;
-void BitShiftCipher(string& s)
+\begin{lstlisting}[caption = {Поиск с сегментами}]
+rec_t segment_search(const seg_arr& segments, size_t key)
 {
-	buf_t buf;
-	int buf_byte = sizeof(buf_t);
-	int buf_bit = buf_byte * 8;
-	int shift = 3;
-	
-	for (int i = 0; i < s.size() - buf_byte + 1; i++)
+	int seg_n = -1;
+	for (int i=0; i<segments.size(); i++)
+	if (segments[i].key == key % 10)
 	{
-		memcpy(&buf, &s[i], buf_byte);
-		buf = (buf >> shift) | (buf << (buf_bit - shift));
-		memcpy(&s[i], &buf, buf_byte);
+		seg_n = i;
+			break;
 	}
+	
+	if (seg_n == -1)
+		return null_rec();
+	
+	const rec_arr& arr = segments[seg_n].records;
+	return full_search(arr, key);
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption = {Функция основного потока (конвейера)}]
-void process_data(conv_queue& task_queue)
+\begin{lstlisting}[caption = {Разбиение словаря по сегментам}]
+seg_arr split_arr(rec_arr& arr)
 {
-	int queue_len = task_queue.size();
-	conv_shared task;
-	
-	double t_wait, t_proc;
-	double min_wait, max_wait, sum_wait;
-	double min_proc, max_proc, sum_proc;
-	min_wait = 1e10;    min_proc = 1e10;
-	max_wait = -1;      max_proc = -1;
-	sum_wait = 0;       sum_proc = 0;
-	for (int i = 0; i < queue_len; i++)
+	seg_arr segments;
+	for (int i = 0; i < 10; i++)
 	{
-		task = task_queue.front();
-		task_queue.pop();
-		t_wait = (task->t_start[1] - task->t_end[0]) + 
-		(task->t_start[2] - task->t_end[1]);
-		min_wait = min(min_wait, t_wait);
-		max_wait = max(max_wait, t_wait);
-		sum_wait += t_wait;
+		rec_seg temp_seg;
+		temp_seg.key = i;
 		
-		t_proc = task->t_end[2] - task->t_start[0];
-		min_proc = min(min_proc, t_proc);
-		max_proc = max(max_proc, t_proc);
-		sum_proc += t_proc;
+		segments.push_back(temp_seg);
 	}
 	
-	cout << endl << endl;
-	printf("WAITING TIME:\t Min:%6.2lf\t Max:%6.2lf\t Avg:%6.2lf\n",
-	min_wait, max_wait, sum_wait / queue_len);
-	printf("PROCESS TIME:\t Min:%6.2lf\t Max:%6.2lf\t Avg:%6.2lf\n",
-	min_proc, max_proc, sum_proc / queue_len);
-}
-
-void main_thread(int queue_len)
-{
-	fCipher f_arr[] = { FeistelCipher, TrithemiusCipher, BitShiftCipher };
-	vector<thread> thread_arr;
-	conv_queue q_arr[4];
-	q_arr[0] = generate_queue(queue_len, 1000*1000);
-	
-	start_counter();
-	for (int i = 0; i < 3; i++)
-	thread_arr.push_back(thread(conv_thread,
-	ref(q_arr[i]), ref(q_arr[i+1]), f_arr[i], queue_len, i));
-	
-	for (int i = 0; i < 3; i++)
-	thread_arr[i].join();
-	
-	process_data(q_arr[3]);
-}
-\end{lstlisting}
-
-\begin{lstlisting}[caption = {Функция рабочего потока (ленты)}]
-void conv_thread(conv_queue& pre_queue, conv_queue& post_queue, fCipher f, int queue_len, int conv_n)
-{
-	conv_shared task;
-	for (int i = 0; i < queue_len; i++)
-	{
-		while (pre_queue.empty()) {}
-		task = pre_queue.front();
-		task->t_start[conv_n] = get_counter();
-		if (conv_n == 0)
-		{
-			pre_queue.pop();
-		}
-		else 
-		{
-			mtx.lock();
-			pre_queue.pop();
-			mtx.unlock();
-		}
-		
-		f(task->data);
-		
-		task->t_end[conv_n] = get_counter();
-		if (conv_n == 2)
-		{
-			post_queue.push(task);
-		}
-		else
-		{
-			mtx.lock();
-			post_queue.push(task);
-			mtx.unlock();
-		}
-	}
+	for (int i = 0; i < arr.size(); i++)
+		segments[arr[i].key % 10].records.push_back(arr[i]);
+	return segments;
 }
 \end{lstlisting}
 
 
 \section{Результаты тестирования}
-Ввиду крайне ограниченой зависимости от входных данных, тестирование проводилось вручную путём введения вышевописанных случаев через консоль. Все тесты пройдены успешно.
+Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций друг с другом.
+
+Состав тестов приведён в листинге 3.5.
+
+\begin{lstlisting}[caption = {Модульные тесты}]
+#include "tests.h"
+
+using namespace std;
+
+rec_t test1(rec_arr& arr, size_t key)
+{
+	return full_search(arr, key);
+}
+rec_t test2(rec_arr& arr, size_t key)
+{
+	sort_arr(arr);
+	return binary_search(arr, key);
+}
+rec_t test3(rec_arr& arr, size_t key)
+{
+	seg_arr sarr = split_arr(arr);
+	return segment_search(sarr, key);
+}
+
+
+bool _cmp_rec(const rec_t& r1, const rec_t& r2)
+{
+	return (r1.key == r2.key) && (r1.val == r2.val);
+}
+
+bool _test_all(rec_arr& arr, size_t key, rec_t res)
+{
+	test_f test_f_arr[3] = { test1, test2, test3 };
+	rec_t test_out;
+	
+	for (int i = 0; i < 3; i++)
+	{
+		test_out = test_f_arr[i](arr, key);
+		if (!_cmp_rec(test_out, res))
+		return false;
+	}
+	return true;
+}
+
+void _find_missing(rec_arr& arr)
+{
+	if (_test_all(arr, 1012, null_rec()))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+void _find_first(rec_arr& arr)
+{
+	if (_test_all(arr, arr[0].key, arr[0]))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+void _find_last(rec_arr& arr)
+{
+	size_t last = arr.size() - 1;
+	if (_test_all(arr, arr[last].key, arr[last]))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+
+void run_tests(rec_arr& arr)
+{
+	cout << "Running tests:" << endl;
+	_find_missing(arr);
+	_find_first(arr);
+	_find_last(arr);
+	cout << endl;
+}
+\end{lstlisting}
+
 
 \section{Оценка времени}
 Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Код функций замера времени приведёны в листинге 3.6.
