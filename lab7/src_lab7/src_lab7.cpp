@@ -44,15 +44,24 @@ void test_time1(rec_arr& arr)
             count++;
         }
         double t = get_counter() / 1000 / count;
-        // cout << i << " : " << t << endl;
         sum_t += t;
         min_t = min(t, min_t);
         max_t = max(t, max_t);
     }
 
+    int count = 0;
+    start_counter();
+    while (get_counter() < 0.1 * 1000)
+    {
+        full_search(arr, 51);
+        count++;
+    }
+    double mis_t = get_counter() / 1000 / count;
+
     cout << "Среднее время:\t" << sum_t / arr.size() << endl;
     cout << "Минимальное время:\t" << min_t << endl;
     cout << "Максимальное время:\t" << max_t << endl;
+    cout << "Несуществующий ключ:\t" << mis_t << endl;
 }
 void test_time2(rec_arr& arr)
 {
@@ -79,9 +88,19 @@ void test_time2(rec_arr& arr)
         max_t = max(t, max_t);
     }
 
+    int count = 0;
+    start_counter();
+    while (get_counter() < 0.1 * 1000)
+    {
+        binary_search(arr, 51);
+        count++;
+    }
+    double mis_t = get_counter() / 1000 / count;
+
     cout << "Среднее время:\t" << sum_t / arr.size() << endl;
     cout << "Минимальное время:\t" << min_t << endl;
     cout << "Максимальное время:\t" << max_t << endl;
+    cout << "Несуществующий ключ:\t" << mis_t << endl;
 }
 void test_time3(rec_arr& arr)
 {
@@ -108,10 +127,19 @@ void test_time3(rec_arr& arr)
         max_t = max(t, max_t);
     }
 
+    int count = 0;
+    start_counter();
+    while (get_counter() < 0.1 * 1000)
+    {
+        segment_search(sarr, 51);
+        count++;
+    }
+    double mis_t = get_counter() / 1000 / count;
+
     cout << "Среднее время:\t" << sum_t / arr.size() << endl;
     cout << "Минимальное время:\t" << min_t << endl;
     cout << "Максимальное время:\t" << max_t << endl;
-    cout << endl;
+    cout << "Несуществующий ключ:\t" << mis_t << endl;
 }
 
 int main(void)
