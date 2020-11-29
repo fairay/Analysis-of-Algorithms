@@ -13,10 +13,27 @@ len_matrix random_matrix(size_t n, len_t from, len_t to, double gap_p)
 	for (int i=0; i<n; i++)
 		for (int j = 1 + i; j < n; j++)
 		{
-			res[i][j] = rand() % (int)(to-from) + from;
+			if ((double)rand() / RAND_MAX < gap_p)
+				res[i][j] = -1;
+			else
+				res[i][j] = rand() % (int)(to - from) + from;
 			res[j][i] = res[i][j];
 		}
 	return res;
+}
+
+len_t matrix_sum(const len_matrix& m)
+{
+	len_t s = 0;
+	for (size_t i = 0; i < m.size(); i++)
+		for (auto val : m[i])
+			if (val > 0)
+				s += val;
+	return s;
+}
+double calculate_q(const len_matrix& m)
+{
+	return (double)matrix_sum(m) / m.size();
 }
 void print_matrix(const len_matrix& m)
 {
@@ -97,9 +114,27 @@ path_t brute_force(const len_matrix& m, len_t& len)
 	path_t full_p(all_nodes(m));
 	full_p.erase(full_p.begin()); // delete 0 node
 	len = -1;
-	return explore_brunch(m, full_p, 0, len);
+	path_t ans(explore_brunch(m, full_p, 0, len));
+	if (ans.size() == m.size() + 1)
+		return ans;
+	else
+	{
+		len = 0;
+		return path_t();
+	}
 }
 
+ant_config create_config(double a, double ro, size_t max_t, len_t q)
+{
+	ant_config cnf;
+	cnf.a = a;
+	cnf.b = 1 - a;
+	cnf.ro = ro;
+	cnf.ans_t = 0;
+	cnf.max_t = max_t;
+	cnf.q = q;
+	return cnf;
+}
 
 using ant_t = struct
 {
@@ -136,7 +171,7 @@ ant_arr init_colony(const len_matrix& m)
 	return arr;
 }
 
-int get_next_node(const len_matrix& m, const vector<vector<double>>& tau, const ant_t& ant, double a, double b)
+int get_next_node(const len_matrix& m, const vector<vector<double>>& tau, const ant_t& ant, const ant_config& cnf)
 {
 	size_t cur = ant.pos;
 	vector<double> node_p(ant.avl_nodes.size(), 0);
@@ -148,22 +183,24 @@ int get_next_node(const len_matrix& m, const vector<vector<double>>& tau, const 
 		if (m[cur][next] < 0)
 			continue;
 
-		double val = pow(tau[cur][next], a) / pow(m[cur][next], b);
+		double val = pow(tau[cur][next], cnf.a) / pow(m[cur][next], cnf.b);
 		sum_p += val;
 		node_p[j] = sum_p;
 	}
-	if (sum_p < 1e-9) { cout << "ZERO\n";  return -1; }
+	if (sum_p < 1e-9) 
+		return -1; 
 
-	double rand_f = (double)rand() / sum_p / RAND_MAX;
+	double rand_f = ((double)rand() / RAND_MAX) * sum_p * (1 - 1e-8);
+
 	for (size_t next = 0; next < node_p.size(); next++)
 		if (node_p[next] > rand_f)
 			return ant.avl_nodes[next];
 	return ant.avl_nodes[node_p.size() - 1];
 }
-int next_step(ant_t& ant, const len_matrix& m, const vector<vector<double>>& tau, double a, double b)
+int next_step(ant_t& ant, const len_matrix& m, const vector<vector<double>>& tau, const ant_config& cnf)
 {
 	size_t cur = ant.pos;
-	int next = get_next_node(m, tau, ant, a, b);
+	int next = get_next_node(m, tau, ant, cnf);
 	if (next == -1)	return 0;
 
 	ant.pos = next;
@@ -173,14 +210,17 @@ int next_step(ant_t& ant, const len_matrix& m, const vector<vector<double>>& tau
 
 	return 1;
 }
-path_t ant_search(const len_matrix& m, double a, double b, double ro, size_t max_t, len_t q)
+path_t ant_search(const len_matrix& m, ant_config& cnf)
 {
-	vector<vector<double>> tau = create_matrix(m.size(), q/50);
+	double init_tau = 1;
+	double min_tau = init_tau/10;
+	vector<vector<double>> tau = create_matrix(m.size(), init_tau);
 
 	path_t min_path;
 	len_t min_len = -1;
+	size_t elite_n = 3;
 
-	for (size_t t = 0; t < max_t; t++)
+	for (size_t t = 0; t < cnf.max_t; t++)
 	{
 		/*cout << endl << endl << "Time " << t << " min len " << min_len << endl;
 		print_matrix(tau);*/
@@ -194,7 +234,7 @@ path_t ant_search(const len_matrix& m, double a, double b, double ro, size_t max
 			size_t init_pos = ant.pos;
 
 			while (ant.avl_nodes.size())
-				if (!next_step(ant, m, tau, a, b)) 
+				if (!next_step(ant, m, tau, cnf)) 
 					break;
 
 			if (ant.avl_nodes.size())
@@ -204,7 +244,7 @@ path_t ant_search(const len_matrix& m, double a, double b, double ro, size_t max
 			else
 			{
 				ant.avl_nodes.push_back(init_pos);
-				if (!next_step(ant, m, tau, a, b)) 
+				if (!next_step(ant, m, tau, cnf)) 
 					ant.temp_len = -1;
 			}
 		}
@@ -218,9 +258,10 @@ path_t ant_search(const len_matrix& m, double a, double b, double ro, size_t max
 			{
 				min_len = ant.temp_len;
 				min_path = ant.path;
+				cnf.ans_t = t;
 			}
 
-			double inc = ((double)q) / ant.temp_len;
+			double inc = ((double)cnf.q) / ant.temp_len;
 			for (size_t i = 1; i < ant.path.size(); i++)
 			{
 				d_tau[ant.path[i]][ant.path[i-1]] += inc;
@@ -228,9 +269,16 @@ path_t ant_search(const len_matrix& m, double a, double b, double ro, size_t max
 			}
 		}
 
+		double inc = ((double)cnf.q) / min_len * elite_n;
+		for (size_t i = 1; i < min_path.size(); i++)
+		{
+			d_tau[min_path[i]][min_path[i - 1]] += inc;
+			d_tau[min_path[i - 1]][min_path[i]] += inc;
+		}
+
 		for (size_t i = 0; i < tau.size(); i++)
 			for (size_t j = 0; j < tau.size(); j++)
-				tau[i][j] = tau[i][j]*(1 - ro) + d_tau[i][j];
+				tau[i][j] = max(tau[i][j]*(1 - cnf.ro) + d_tau[i][j], min_tau);
 	}
 
 	return min_path;
