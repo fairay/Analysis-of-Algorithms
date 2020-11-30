@@ -25,15 +25,15 @@ bool _same_way()
     cout << __FUNCTION__;
     len_t len = 0;
     path_t path;
-    len_matrix m = random_matrix(7, 1, 9, 0.99);
+    len_matrix m = random_matrix(7, 1, 1);
 
     len = 0;
     path = brute_force(m, len);
-    if (len || path.size()) return false;
+    if (len != m.size()|| path.size() != m.size() + 1) return false;
 
     ant_config cnf = create_config(0.5, 0.5, 20, calculate_q(m));
     path = ant_search(m, cnf);
-    if (path.size())    return false;
+    if (path_len(m, path) != m.size() || path.size() != m.size() + 1)    return false;
     return true;
 }
 
@@ -51,10 +51,23 @@ bool _size_two()
 
     ant_config cnf = create_config(0.5, 0.5, 20, calculate_q(m));
     path = ant_search(m, cnf);
-    if (path.size())    return false;
+    if (path.size() != 3 || path_len(m, path) != ans)    return false;
     return true;
 }
 
+bool _rnd_matrix()
+{
+    cout << __FUNCTION__;
+    len_t len = 0;
+    path_t path;
+    len_matrix m = random_matrix(10, 1, 9);
+
+    len = 0;
+    path = brute_force(m, len);
+    if (path.size() != 11) return false;
+
+    return true;
+}
 
 
 using test_f = bool(*)(void);
@@ -66,13 +79,11 @@ void run_tests()
 
     for (size_t i = 0; i < 4; i++)
     {
-        if (f_arr[i])
+        if (f_arr[i]())
             cout << " - PASSED\n";
         else
             cout << " - FAILED\n";
     }
-
-
 
     cout << endl;
 }

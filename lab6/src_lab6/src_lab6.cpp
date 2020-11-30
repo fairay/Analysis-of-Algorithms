@@ -2,6 +2,7 @@
 #include <time.h>
 
 #include "graph.h"
+#include "tests.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ void best_config(const len_matrix& m, len_t q)
         double b = 1 - a;
         for (double ro = 0; ro <= 1; ro += 0.1)
         {
-            ant_config cnf = create_config(a, ro, 50, q);
+            ant_config cnf = create_config(a, ro, 30, q);
             len_t local_min = q * 1000;
             for (int i=0; i<3; i++)
             {
@@ -41,10 +42,12 @@ int main()
     srand(static_cast<unsigned int>(time(0)));
     setlocale(LC_ALL, "Russian");
 
-    len_matrix m = random_matrix(5, 1, 9, 0.3);
+    run_tests();
+
+    len_matrix m = random_matrix(10, 1, 100, 0.0);
     print_matrix(m);
 
-    best_config(m, calculate_q(m));
+    // best_config(m, calculate_q(m));
 
     len_t len = 0;
     path_t path = brute_force(m, len);

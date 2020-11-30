@@ -16,7 +16,12 @@ len_matrix random_matrix(size_t n, len_t from, len_t to, double gap_p)
 			if ((double)rand() / RAND_MAX < gap_p)
 				res[i][j] = -1;
 			else
-				res[i][j] = rand() % (int)(to - from) + from;
+			{
+				if (from != to)
+					res[i][j] = rand() % (int)(to - from) + from;
+				else
+					res[i][j] = from;
+			}
 			res[j][i] = res[i][j];
 		}
 	return res;
@@ -218,7 +223,7 @@ path_t ant_search(const len_matrix& m, ant_config& cnf)
 
 	path_t min_path;
 	len_t min_len = -1;
-	size_t elite_n = 3;
+	size_t elite_n = 4;
 
 	for (size_t t = 0; t < cnf.max_t; t++)
 	{

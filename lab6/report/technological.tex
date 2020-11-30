@@ -1,0 +1,180 @@
+\section{Выбор языка программирования}
+В качестве языка программирования был выбран C++\cite{C++_Doc}, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Разработка проводилась в среде Visual Studio 2019\cite{VisualStudio}.
+
+\section{Листинги кода}
+Реализация алгоритмов поиска представлена на листингах 3.1-3.3. На листинге 3.4 представлена реализация разбиения словаря по сегментам
+
+\begin{lstlisting}[caption = {Поиск полным перебором}]
+rec_t full_search(const rec_arr& arr, size_t key)
+{
+	for (int i = 0; i < arr.size(); i++)
+		if (arr[i].key == key)
+			return arr[i];
+	return null_rec();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption = {Поиск половинным разбиением}]
+rec_t binary_search(const rec_arr& arr, size_t key)
+{
+	int left = 0;
+	int right = arr.size() - 1;
+	while (left <= right)
+	{
+		int mid = (left + right) / 2;
+		if (key == arr[mid].key)
+			return arr[mid];
+		if (key < arr[mid].key)
+			right = mid - 1;  
+		else                  
+			left = mid + 1;   
+	}
+	return null_rec();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption = {Поиск с сегментами}]
+rec_t segment_search(const seg_arr& segments, size_t key)
+{
+	int seg_n = -1;
+	for (int i=0; i<segments.size(); i++)
+	if (segments[i].key == key % 10)
+	{
+		seg_n = i;
+			break;
+	}
+	
+	if (seg_n == -1)
+		return null_rec();
+	
+	const rec_arr& arr = segments[seg_n].records;
+	return full_search(arr, key);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption = {Разбиение словаря по сегментам}]
+seg_arr split_arr(rec_arr& arr)
+{
+	seg_arr segments;
+	for (int i = 0; i < 10; i++)
+	{
+		rec_seg temp_seg;
+		temp_seg.key = i;
+		
+		segments.push_back(temp_seg);
+	}
+	
+	for (int i = 0; i < arr.size(); i++)
+		segments[arr[i].key % 10].records.push_back(arr[i]);
+	return segments;
+}
+\end{lstlisting}
+
+
+\section{Результаты тестирования}
+Для тестирования написанных функций был создан отдельный файл с ранее описанными классами тестов. Тестирование функций проводилось за счёт сравнения результов функций друг с другом.
+
+Состав тестов приведён в листинге 3.5.
+
+\begin{lstlisting}[caption = {Модульные тесты}]
+#include "tests.h"
+
+using namespace std;
+
+rec_t test1(rec_arr& arr, size_t key)
+{
+	return full_search(arr, key);
+}
+rec_t test2(rec_arr& arr, size_t key)
+{
+	sort_arr(arr);
+	return binary_search(arr, key);
+}
+rec_t test3(rec_arr& arr, size_t key)
+{
+	seg_arr sarr = split_arr(arr);
+	return segment_search(sarr, key);
+}
+
+
+bool _cmp_rec(const rec_t& r1, const rec_t& r2)
+{
+	return (r1.key == r2.key) && (r1.val == r2.val);
+}
+
+bool _test_all(rec_arr& arr, size_t key, rec_t res)
+{
+	test_f test_f_arr[3] = { test1, test2, test3 };
+	rec_t test_out;
+	
+	for (int i = 0; i < 3; i++)
+	{
+		test_out = test_f_arr[i](arr, key);
+		if (!_cmp_rec(test_out, res))
+		return false;
+	}
+	return true;
+}
+
+void _find_missing(rec_arr& arr)
+{
+	if (_test_all(arr, 1012, null_rec()))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+void _find_first(rec_arr& arr)
+{
+	if (_test_all(arr, arr[0].key, arr[0]))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+void _find_last(rec_arr& arr)
+{
+	size_t last = arr.size() - 1;
+	if (_test_all(arr, arr[last].key, arr[last]))
+	cout << __FUNCTION__ << " - OK\n";
+	else
+	cout << __FUNCTION__ << " - FAILED\n";
+}
+
+void run_tests(rec_arr& arr)
+{
+	cout << "Running tests:" << endl;
+	_find_missing(arr);
+	_find_first(arr);
+	_find_last(arr);
+	cout << endl;
+}
+\end{lstlisting}
+
+
+\section{Оценка времени}
+Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Код функций замера времени приведёны в листинге 3.6.
+
+\begin{lstlisting}[caption = {Функции замера процессорного времени работы функции}]
+double PCFreq = 0.0;
+__int64 CounterStart = 0;
+
+void start_counter()
+{
+	LARGE_INTEGER li;
+	QueryPerformanceFrequency(&li);
+	
+	PCFreq = double(li.QuadPart) / 1000.0;
+	
+	QueryPerformanceCounter(&li);
+	CounterStart = li.QuadPart;
+}
+
+double get_counter()
+{
+	LARGE_INTEGER li;
+	QueryPerformanceCounter(&li);
+	return double(li.QuadPart - CounterStart) / PCFreq;
+}
+\end{lstlisting}
+
+\section*{Вывод}
+Результатом технологической части стал выбор используемых технических средств реализации и реализация алгоритмов, системы тестов и замера времени работы на языке С++.
