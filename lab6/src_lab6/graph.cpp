@@ -44,9 +44,17 @@ void print_matrix(const len_matrix& m)
 {
 	for (size_t i=0; i<m.size(); i++)
 	{
-		for (auto val : m[i])
-			cout << val << "\t";
-		cout << endl;
+		for (size_t j = 0; j < m.size(); j++)
+		{
+			cout << m[i][j];
+			/*if (i != j)
+				cout << m[i][j];
+			else
+				cout << "-";*/
+			if (j != m.size() - 1)
+				cout << " &\t";
+		}
+		cout << " \\\\"<< endl;
 	}
 }
 
@@ -176,7 +184,7 @@ ant_arr init_colony(const len_matrix& m)
 	return arr;
 }
 
-int get_next_node(const len_matrix& m, const vector<vector<double>>& tau, const ant_t& ant, const ant_config& cnf)
+int get_next_node(const ant_t& ant, const len_matrix& m, const vector<vector<double>>& tau, const ant_config& cnf)
 {
 	size_t cur = ant.pos;
 	vector<double> node_p(ant.avl_nodes.size(), 0);
@@ -205,7 +213,7 @@ int get_next_node(const len_matrix& m, const vector<vector<double>>& tau, const 
 int next_step(ant_t& ant, const len_matrix& m, const vector<vector<double>>& tau, const ant_config& cnf)
 {
 	size_t cur = ant.pos;
-	int next = get_next_node(m, tau, ant, cnf);
+	int next = get_next_node(ant, m, tau, cnf);
 	if (next == -1)	return 0;
 
 	ant.pos = next;
@@ -223,7 +231,7 @@ path_t ant_search(const len_matrix& m, ant_config& cnf)
 
 	path_t min_path;
 	len_t min_len = -1;
-	size_t elite_n = 4;
+	size_t elite_n = 7;
 
 	for (size_t t = 0; t < cnf.max_t; t++)
 	{

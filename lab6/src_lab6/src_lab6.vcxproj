@@ -142,10 +142,12 @@
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="src_lab6.cpp" />
     <ClCompile Include="tests.cpp" />
+    <ClCompile Include="timer_.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h" />
     <ClInclude Include="tests.h" />
+    <ClInclude Include="timer_.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

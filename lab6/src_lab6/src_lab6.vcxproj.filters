@@ -24,12 +24,18 @@
     <ClCompile Include="tests.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="timer_.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="tests.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="timer_.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
