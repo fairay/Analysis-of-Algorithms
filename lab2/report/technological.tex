@@ -1,0 +1,309 @@
+\section{Выбор языка программирования}
+В качестве языка программирования был выбран C++, так как имеется опыт работы с ним, и с библиотеками, позволяющими провести исследование и тестирование программы. Также в языке имеются средства для отключения оптимизации компилятора.
+
+
+\section{Листинг кода}
+Реализация алгоритмов умножения матриц представлена на листингах 3.1-3.2.
+
+\begin{lstlisting}[caption = Функция умножения матриц классическим алгоритмом.]
+#include "classic.h"
+#pragma optimize( "", off )
+mat_t classic_mult(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c = create_mat(m, q);
+	
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < q; j++)
+		{
+			c[i][j] = 0;
+			for (int k = 0; k < n; k++)
+				c[i][j] += a[i][k] * b[k][j];
+		}
+	return c;
+}
+#pragma optimize( "", on )
+\end{lstlisting}
+
+\begin{lstlisting}[caption = Функция умножения матриц алгоритмом Винограда.]
+#include "winograd.h"
+
+#pragma optimize( "", off )
+
+arr_t calc_mi(mat_t a, int m, int n)
+{
+	arr_t mi = create_arr(m);
+	for (int i = 0; i < m; i++)
+	{
+		mi[i] = 0;
+		for (int k = 0; k < n / 2; k++)
+			mi[i] += a[i][2*k] * a[i][2*k + 1];
+	}
+	return mi;
+}
+arr_t calc_mj(mat_t b, int n, int q)
+{
+	arr_t mj = create_arr(q);
+	for (int j = 0; j < q; j++)
+	{
+		mj[j] = 0;
+		for (int k = 0; k < n / 2; k++)
+			mj[j] += b[2*k][j] * b[2*k + 1][j];
+	}
+	return mj;
+}
+mat_t winograd_mult(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c = create_mat(m, q);
+	arr_t mi = calc_mi(a, m, n);
+	arr_t mj = calc_mj(b, n, q);
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < q; j++)
+		{
+			c[i][j] = -(mi[i] + mj[j]);
+			for (int k = 0; k < n / 2; k++)
+				c[i][j] +=	(a[i][2*k] + b[2*k + 1][j]) * 
+							(a[i][2*k + 1] + b[2*k][j]);
+		}
+	if (n % 2)
+		for (int i = 0; i < m; i++)
+			for (int j = 0; j < q; j++)
+				c[i][j] += a[i][n-1] * b[n-1][j];
+	return c;
+}
+
+#pragma optimize( "", on )
+\end{lstlisting}
+
+\begin{lstlisting}[caption = Оптимизированая функция умножения матриц алгоритмом Винограда.]
+#include "winograd.h"
+
+#pragma optimize( "", off )
+
+arr_t calc_mj(mat_t b, int n, int q)
+{
+	arr_t mj = create_arr(q);
+	for (int j = 0; j < q; j++)
+	{
+		double mjj = 0; 
+		for (int k = 1; k < n; k += 2)
+			mjj += b[k][j] * b[k - 1][j];
+		mj[j] = mjj;
+	}
+	return mj;
+}
+
+mat_t winograd_mult(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c = create_mat(m, q);
+	arr_t mj = calc_mj(b, n, q);
+	
+	for (int i = 0; i < m; i++)
+	{
+		double mi_i = 0;
+		for (int k = 1; k < n; k += 2)
+			mi_i += a[i][k] * a[i][k - 1];
+		
+		for (int j = 0; j < q; j++)
+		{
+			double cij = -(mi_i + mj[j]);
+			int k = 1;
+			int k1 = 0;
+			for (; k < n; k += 2, k1 += 2)
+				cij +=	(a[i][k] + b[k1][j]) * (a[i][k1] + b[k][j]);
+			c[i][j] = cij;
+		}
+	}
+	
+	if (n % 2)
+	{
+		int n_minus1 = n - 1;
+		for (int i = 0; i < m; i++)
+			for (int j = 0; j < q; j++)
+				c[i][j] += a[i][n_minus1] * b[n_minus1][j];
+	}
+	
+	free_arr(&mj);
+	return c;
+}
+
+#pragma optimize( "", on )
+\end{lstlisting}
+
+
+
+\section{Результаты тестирования}
+Для тестирования написанных функций был создан отдельный файл с вышеописаными классами тестов. Тестирование функций проводилось за счёт сравнения результов двух функций.
+
+Состав тестов приведён в листинге 3.4.
+
+\begin{lstlisting}[caption = Модульные тесты]
+#include "tests.h"
+// Сравнение результата умножения разными способами
+bool _cmp_funcs(mat_t a, mat_t b, int m, int n, int q)
+{
+	mat_t c1 = classic_mult(a, b, m, n, q);
+	mat_t c2 = winograd_mult(a, b, m, n, q);
+	bool flag = cmp_matrix(c1, c2, m, q);
+	free_mat(&c1, m, q);
+	free_mat(&c2, m, q);
+	return flag;
+}
+
+// Матрицы с размером 1x1
+void _size_one_test()
+{
+	mat_t a = create_mat(1, 1);
+	mat_t b = create_mat(1, 1);
+	
+	a[0][0] = 0;
+	b[0][0] = 1;
+	if (!_cmp_funcs(a, b, 1, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	a[0][0] = 3;
+	b[0][0] = 4;
+	if (!_cmp_funcs(a, b, 1, 1, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 1, 1);
+	free_mat(&b, 1, 1);
+	
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Нулевые матрицы
+void _void_test()
+{
+	mat_t a = random_matrix(3, 2);
+	mat_t b = void_matrix(2, 1);
+	if (!_cmp_funcs(a, b, 3, 2, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	a = void_matrix(3, 2);
+	if (!_cmp_funcs(a, b, 3, 2, 1))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	free_mat(&a, 3, 2);
+	free_mat(&b, 2, 1);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Квадратные матрицы
+void _square_test()
+{
+	mat_t a = random_matrix(4, 4);
+	mat_t b = random_matrix(4, 4);
+	
+	if (!_cmp_funcs(a, b, 4, 4, 4))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 4, 4);
+	free_mat(&b, 4, 4);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+// Матрицы нечётного размера
+void _odd_test()
+{
+	mat_t a = random_matrix(5, 3);
+	mat_t b = random_matrix(3, 7);
+	
+	if (!_cmp_funcs(a, b, 5, 3, 7))
+	{
+		std::cout << __FUNCTION__ << " - FAILED\n";
+		return;
+	}
+	
+	free_mat(&a, 5, 3);
+	free_mat(&b, 3, 7);
+	std::cout << __FUNCTION__ << " - OK\n";
+}
+
+void run_tests()
+{
+	_size_one_test();
+	_void_test();
+	_square_test();
+	_odd_test();
+}
+\end{lstlisting}
+
+Все тесты пройдены успешно.
+
+% //////////////
+\section{Оценка трудоёмкости}
+Произведём оценку трудоёмкости алгоритов. Будем считать, что умножаются матрицы $ A[M*N] $ и $ B[N*Q] $ \\
+
+\textbf{Классический алгоритм умножения.} 
+\par $ f_{cls} = 2 + M\cdot(4 + Q\cdot(4 + 3 + N\cdot(2 + 2 + 1 + 2 + 1 + 2))) $
+\par $ f_{cls} = 2 + 4M + 7QM + 10MNQ $\\
+
+\textbf{Алгоритм умножения Винограда.} 
+\par  $ f_{win} = (2 + M(2 + 1 + 3 + \frac{N}{2}(3 + 2 + 3 + 1 + 4))) +
+(2 + Q(2 + 1 + 3 + \frac{N}{2}(3 + 2 + 3 + 1 + 4))) +
+2 + M(2 + 2 + Q(2 + 5 + 3 + \frac{N}{2}(3 + 3 + 8 + 1 + 8))) + 1 +
+\left\{\begin{array}{ll}
+	0, & $л.с.$\\
+	2 + M\cdot(2 + 2 + Q\cdot(2 + 3 + 3 + 1 + 3)), & $х.с.$
+\end{array} \right.$\\
+
+\par  $ f_{win} = 7 + 10M + \frac{13}{2}MN + 6Q + \frac{13}{2}NQ + 10MQ + \frac{23}{2}MNQ +
+\left\{\begin{array}{ll}
+	0, & $л.с.$\\
+	2 + 4M + 12MQ, & $х.с.$
+\end{array} \right.$\\
+
+
+\textbf{Оптимизированный алгоритм умножения Винограда.} 
+\par $ f_{opt\_win} = (2 + Q\cdot(2 + 1 + 2 + (N/2)\cdot(2 + 2 + 1 + 2 + 1 + 3) + 1)) + 
+2 + M\cdot(2 + 1 + 2 + (N/2)\cdot(2 + 1 + 2 + 1 + 3) + 2 + Q\cdot(2 + 4 + 3 + (N/2)\cdot(3 + 1 + 5 + 1 + 5))) + 1 +
+\left\{\begin{array}{ll}
+	0, & $л.с.$\\
+	2 + 2 + M\cdot(2 + 2 + Q\cdot(2 + 3 + 2 + 1 + 2)), & $х.с.$
+\end{array} \right.$\\
+
+\par $ f_{opt\_win} = 5 + 6Q + 5.5NQ + 
+7M + 4.5MN + 9MQ + 7.5MNQ +
+\left\{\begin{array}{ll}
+	0, & $л.с.$\\
+	4 + 4M + 10MQ, & $х.с.$
+\end{array} \right.$
+
+
+
+\section{Оценка времени}
+Для замера процессорного времени исполнения функции используется функция QueryPerformanceCounter библиотеки windows.h\cite{QueryPerformanceCounter}. Проведение измерений производится в функции, приведённой в листинге 3.5.
+
+\begin{lstlisting}[caption = Функция замера процессорного времени работы функции]
+void test_time(mat_t(*f)(mat_t, mat_t, int, int, int), int n)
+{
+	cout << "\nРазмер матрицы: " << n << endl;
+	mat_t a = random_matrix(n, n);
+	mat_t b = random_matrix(n, n);
+	mat_t c;
+	int count = 0;
+	start_counter();
+	while (get_counter() < 3.0 * 1000) {
+		c = f(a, b, n, n, n);
+		free_mat(&c, n, n);
+		count++;
+	}
+	double t = get_counter() / 1000;
+	cout << "Выполнено " << count << " операций за " << t << " секунд" << endl;
+	cout << "Время: " << t / count << endl;
+	free_mat(&a, n, n);
+	free_mat(&b, n, n);
+}
+\end{lstlisting}
+
